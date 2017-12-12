@@ -13,6 +13,8 @@
 class BondPriceStreamsServiceListener : public ServiceListener<PriceStream<Bond>> {
  public:
   explicit BondPriceStreamsServiceListener(HistoricalDataService<PriceStream<Bond>> *listeningService);
+  void ProcessRemove(PriceStream<Bond> &data) override;
+  void ProcessUpdate(PriceStream<Bond> &data) override;
  private:
   HistoricalDataService<PriceStream<Bond>> *listeningService;
   void ProcessAdd(PriceStream<Bond> &data) override;
@@ -31,13 +33,17 @@ class BondPriceStreamsHistoricalDataService : public HistoricalDataService<Price
   BondPriceStreamsHistoricalDataService();
   void PersistData(string persistKey, const PriceStream<Bond> &data) override;
  private:
-  BondPriceStreamsConnector *connector = new BondPriceStreamsConnector("streaming.csv");
+  void OnMessage(PriceStream<Bond> &data) override;
+  BondPriceStreamsConnector *connector;
 };
 
 void BondPriceStreamsHistoricalDataService::PersistData(string persistKey, const PriceStream<Bond> &data) {
   connector->Publish(const_cast<PriceStream<Bond> &>(data));
 }
-BondPriceStreamsHistoricalDataService::BondPriceStreamsHistoricalDataService() = default;
+BondPriceStreamsHistoricalDataService::BondPriceStreamsHistoricalDataService() {
+  connector = new BondPriceStreamsConnector("streaming.csv");
+  connector->WriteHeader();
+}
 
 BondPriceStreamsConnector::BondPriceStreamsConnector(const string &filePath) : OutputFileConnector(filePath) {
 }
@@ -54,7 +60,19 @@ BondPriceStreamsServiceListener::BondPriceStreamsServiceListener(HistoricalDataS
     listeningService) {}
 
 void BondPriceStreamsServiceListener::ProcessAdd(PriceStream<Bond> &data) {
+  std::cout << "ProcessAdd in BondPriceStreamsServiceListener" << std::endl;
+
   listeningService->PersistData("dummy key", data);
 }
 
+void BondPriceStreamsServiceListener::ProcessRemove(PriceStream<Bond> &data) {
+
+}
+void BondPriceStreamsServiceListener::ProcessUpdate(PriceStream<Bond> &data) {
+
+}
+
+void BondPriceStreamsHistoricalDataService::OnMessage(PriceStream<Bond> &data) {
+
+}
 #endif //BONDTRADINGSYSTEM_BONDSTREAMSHISTORICALDATASERVICE_H

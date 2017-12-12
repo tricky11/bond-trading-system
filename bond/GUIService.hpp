@@ -53,10 +53,11 @@ void BondPriceServiceListener::ProcessUpdate(Price<Bond> &data) {
 GUIConnector::GUIConnector(const string &filePath) : OutputFileConnector(filePath) {}
 
 string GUIConnector::toCSVString(Price<Bond> &data) {
-  return std::to_string(data.GetMid());
+  return std::to_string(data.GetMid() - data.GetBidOfferSpread() / 2) + "," +
+          std::to_string(data.GetMid() + data.GetBidOfferSpread() / 2);
 }
 string GUIConnector::getCSVHeader() {
-  return "Dummy gui header";
+  return "Bid,Ask";
 }
 void GUIService::PersistData(Price<Bond> &data) {
   connector->Publish(data);
