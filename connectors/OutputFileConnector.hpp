@@ -15,9 +15,9 @@ class OutputFileConnector : public Connector<V> {
  private:
   string filePath;
 
-  void appendLineToFile(string line) {
+  void appendLineToFile(string line, bool newFile) {
     ofstream outFile;
-    outFile.open(filePath, ios_base::ate);
+    outFile.open(filePath, newFile ? ios_base::trunc : ios_base::app);
     if (!outFile) {
       cerr << "Unable to open file " << filePath;
       exit(1);   // call system to stop
@@ -28,11 +28,11 @@ class OutputFileConnector : public Connector<V> {
 
  public:
   void Publish(V &data) override {
-    appendLineToFile(toCSVString(data));
+    appendLineToFile(toCSVString(data), false);
   }
 
   void WriteHeader() {
-    appendLineToFile(getCSVHeader());
+    appendLineToFile(getCSVHeader(), true);
   }
 
   virtual string toCSVString(V &data) = 0;

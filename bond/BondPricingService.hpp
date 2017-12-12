@@ -26,13 +26,15 @@ class BondPricingService : public PricingService<Bond> {
 
 Price<Bond> BondPricesConnector::parse(string line) {
   // TODO: Parse line to create Price object.
-  return Price<Bond>(Bond(), 100.0, 0.1);
+  double mid = stod(line);
+  auto product = Bond("id", BondIdType::CUSIP, "ticker", 2.0, boost::gregorian::date());
+  return Price<Bond>(product, mid, 0.1);
 }
 BondPricesConnector::BondPricesConnector(const string &filePath, Service<string, Price<Bond>> *connectedService)
     : InputFileConnector(filePath, connectedService) {}
 
 void BondPricingService::OnMessage(Price<Bond> &data) {
-  dataStore.insert({data.GetProduct().GetProductId(), data});
+  dataStore.insert({"dummy", data});
   for (auto listener : this->GetListeners()) {
     listener->ProcessAdd(data);
   }
