@@ -9,41 +9,39 @@
 #include <fstream>
 #include <iostream>
 #include "../base/soa.hpp"
-template<typename V>
+template<typename K, typename V>
 class InputFileConnector : public Connector<V> {
  private:
   string filePath;
-  Service *connectedService;
+  Service<K, V> *connectedService;
 
  public:
+  virtual V parse(string line) = 0;
+
   void Publish(V &data) override {
     //do nothing since this is a subscribe only connector.
   }
 
-  void read();
-  virtual V parse(string line) = 0;
+  void read() {
+    ifstream inFile;
+    string line;
+    inFile.open(filePath);
+    if (!inFile) {
+      std::cerr << "Unable to open file " << filePath;
+      exit(1);   // call system to stop
+    }
+    inFile >> line; // skip headers
 
-  InputFileConnector(const string &filePath, Service *connectedService)
+    while (inFile >> line) {
+      auto data = parse(line);
+      connectedService->OnMessage(data);
+    }
+    inFile.close();
+  }
+
+  InputFileConnector(const string &filePath, Service<K, V> *connectedService)
       : filePath(filePath), connectedService(connectedService) {
-    read();
   }
 };
-
-template<typename V>
-void InputFileConnector<V>::read() {
-  ifstream inFile;
-  string line;
-  inFile.open(filePath);
-  if (!inFile) {
-    std::cerr << "Unable to open file " << filePath;
-    exit(1);   // call system to stop
-  }
-  inFile >> line; // skip headers
-
-  while (inFile >> line) {
-    connectedService->OnMessage(parse(line));
-  }
-  inFile.close();
-}
 
 #endif //BONDTRADINGSYSTEM_INPUTFILECONNECTOR_H

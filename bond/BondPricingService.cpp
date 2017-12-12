@@ -2,28 +2,21 @@
 // Created by Harish Reddy on 12/11/2017.
 //
 
-#include <sstream>
-#include "../base/products.hpp"
-#include "../base/pricingservice.hpp"
-#include "../connectors/InputFileConnector.hpp"
+#include "BondPricingService.hpp"
 
-class BondPricesConnector : InputFileConnector<Price<Bond>> {
- public:
-  BondPricesConnector(const string &filePath, Service *connectedService) : InputFileConnector(filePath,
-                                                                                              connectedService) {}
+Price<Bond> BondPricesConnector::parse(string line) {
+  // TODO: Parse line to create Price object.
+  return Price<Bond>(Bond(), 100.0, 0.1);
+}
+BondPricesConnector::BondPricesConnector(const string &filePath, Service<string, Price<Bond>> *connectedService)
+    : InputFileConnector(filePath, connectedService) {}
 
- private:
-  Price<Bond> parse(string line) override {
-    // TODO: Parse line to create Price object.
-    return Price<Bond>(Bond(), 100.0, 0.1);
+void BondPricingService::OnMessage(Price<Bond> &data) {
+  dataStore.insert({data.GetProduct().GetProductId(), data});
+  for (auto listener : this->GetListeners()) {
+    listener->ProcessAdd(data);
   }
-};
-
-class BondPricingService : public PricingService<Bond> {
-
- public:
-  BondPricingService() {
-    new BondPricesConnector("prices.txt", (Service *) this);
-  }
-};
-
+}
+void BondPricingService::Subscribe(BondPricesConnector *connector) {
+  connector->read();
+}

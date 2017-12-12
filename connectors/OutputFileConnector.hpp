@@ -9,15 +9,12 @@
 #include <fstream>
 #include <iostream>
 #include "../base/soa.hpp"
+
 template<typename V>
 class OutputFileConnector : public Connector<V> {
  private:
   string filePath;
 
- public:
-  void Publish(V &data) override {
-    appendLineToFile(toCSVString(data));
-  }
   void appendLineToFile(string line) {
     ofstream outFile;
     outFile.open(filePath, ios_base::ate);
@@ -29,12 +26,19 @@ class OutputFileConnector : public Connector<V> {
     outFile.close();
   }
 
-  virtual string toCSVString(V &data) = 0;
-  virtual void writeHeader() = 0;
-
-  OutputFileConnector(const string &filePath, Service *connectedService)
-      : filePath(filePath) {
+ public:
+  void Publish(V &data) override {
+    appendLineToFile(toCSVString(data));
   }
+
+  void WriteHeader() {
+    appendLineToFile(getCSVHeader());
+  }
+
+  virtual string toCSVString(V &data) = 0;
+  virtual string getCSVHeader() = 0;
+
+  explicit OutputFileConnector(const string &filePath) : filePath(filePath) {}
 };
 
 #endif //BONDTRADINGSYSTEM_OUTPUTFILECONNECTOR_H
