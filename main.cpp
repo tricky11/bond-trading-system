@@ -9,18 +9,22 @@
 #include "bond/trade/BondPositionHistoricalDataService.hpp"
 #include "bond/trade/BondRiskHistoricalDataService.hpp"
 #include "bond/trade/BondRiskService.hpp"
+#include "bond/execution/BondMarketDataService.hpp"
+#include "bond/execution/BondAlgoExecutionService.hpp"
+#include "bond/execution/BondExecutionService.hpp"
+#include "bond/execution/BondExecutionHistoricalDataService.h"
 
 void runStreamingProcess();
 void runInquiryFlow();
 
-void runTradesFlow();
+void runTradesAndExecutionFlow();
 int main() {
 //  runStreamingProcess();
 //  runInquiryFlow();
-  runTradesFlow();
+  runTradesAndExecutionFlow();
 
 }
-void runTradesFlow() {
+void runTradesAndExecutionFlow() {
   auto tradeBookingService = new BondTradeBookingService();
   auto positionService = new BondPositionService();
   auto riskService = new BondRiskService();
@@ -37,7 +41,21 @@ void runTradesFlow() {
   positionService->AddListener(positionListenerFromRisk);
   riskService->AddListener(riskListener);
 
+  auto marketDataService = new BondMarketDataService();
+  auto algoExecutionService = new BondAlgoExecutionService();
+  auto executionService = new BondExecutionService();
+  auto executionHistoricalDataService = new BondExecutionHistoricalDataService();
+
+  auto marketDataListener = new BondMarketDataServiceListener(algoExecutionService);
+  auto algoExecutionListener = new BondAlgoExecutionServiceListener(executionService);
+  auto executionListener = new BondExecutionOrderServiceListener(executionHistoricalDataService);
+
+  marketDataService->AddListener(marketDataListener);
+  algoExecutionService->AddListener(algoExecutionListener);
+  executionService->AddListener(executionListener);
+
   tradeBookingService->Subscribe(new BondTradesConnector("trades.csv", tradeBookingService));
+  marketDataService->Subscribe(new BondMarketDataConnector("marketdata.csv", marketDataService));
 }
 
 void runInquiryFlow() {

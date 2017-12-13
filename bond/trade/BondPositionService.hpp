@@ -11,18 +11,9 @@
 
 class BondPositionService : public PositionService<Bond> {
  public:
-  void PublishTradeStream(Position<Bond> &position) {
-    for (auto listener : this->GetListeners()) {
-      //TODO: Replace dummies.
-      auto product = Bond("id", BondIdType::CUSIP, "ticker", 2.0, boost::gregorian::date());
-      Position<Bond> position(product);
-      listener->ProcessAdd(position);
-    }
-  }
-
   void AddTrade(const Trade<Bond> &trade) override {
     for (auto listener : this->GetListeners()) {
-      listener->ProcessAdd(position);
+      listener->ProcessAdd((Position<Bond> &) trade);
     }
   }
 
