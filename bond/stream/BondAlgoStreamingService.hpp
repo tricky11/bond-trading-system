@@ -5,10 +5,10 @@
 #ifndef BONDTRADINGSYSTEM_BONDALGOSTREAMINGSERVICE_H
 #define BONDTRADINGSYSTEM_BONDALGOSTREAMINGSERVICE_H
 
-#include "../base/pricingservice.hpp"
-#include "../base/products.hpp"
-#include "../base/soa.hpp"
-#include "../base/streamingservice.hpp"
+#include "../../base/pricingservice.hpp"
+#include "../../base/products.hpp"
+#include "../../base/soa.hpp"
+#include "../../base/streamingservice.hpp"
 
 template<typename T>
 class AlgoStream {

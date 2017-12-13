@@ -6,10 +6,10 @@
 #define BONDTRADINGSYSTEM_BONDPRICINGSERVICE_H
 
 #include <sstream>
-#include "../base/products.hpp"
-#include "../base/pricingservice.hpp"
-#include "../connectors/InputFileConnector.hpp"
-#include "../utils/string.h"
+#include "../../base/products.hpp"
+#include "../../base/pricingservice.hpp"
+#include "../../connectors/InputFileConnector.hpp"
+#include "../../utils/string.h"
 
 class BondPricesConnector : public InputFileConnector<string, Price<Bond>> {
  public:

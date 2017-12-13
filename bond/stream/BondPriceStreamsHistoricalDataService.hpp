@@ -5,10 +5,10 @@
 #ifndef BONDTRADINGSYSTEM_BONDSTREAMSHISTORICALDATASERVICE_H
 #define BONDTRADINGSYSTEM_BONDSTREAMSHISTORICALDATASERVICE_H
 
-#include "../base/historicaldataservice.hpp"
-#include "../base/products.hpp"
-#include "../connectors/OutputFileConnector.hpp"
-#include "../base/streamingservice.hpp"
+#include "../../base/historicaldataservice.hpp"
+#include "../../base/products.hpp"
+#include "../../connectors/OutputFileConnector.hpp"
+#include "../../base/streamingservice.hpp"
 
 class BondPriceStreamsServiceListener : public ServiceListener<PriceStream<Bond>> {
  public:

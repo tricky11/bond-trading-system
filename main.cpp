@@ -1,13 +1,23 @@
-#include "bond/BondPricingService.hpp"
-#include "bond/GUIService.hpp"
-#include "bond/BondAlgoStreamingService.hpp"
-#include "bond/BondStreamingService.hpp"
-#include "bond/BondPriceStreamsHistoricalDataService.hpp"
+#include "bond/stream/BondPricingService.hpp"
+#include "bond/stream/GUIService.hpp"
+#include "bond/stream/BondAlgoStreamingService.hpp"
+#include "bond/stream/BondStreamingService.hpp"
+#include "bond/stream/BondPriceStreamsHistoricalDataService.hpp"
+#include "bond/inquiry/BondInquiryService.hpp"
 
 void runStreamingProcess();
 
+void runInquiryFlow();
 int main() {
-  runStreamingProcess();
+//  runStreamingProcess();
+
+  runInquiryFlow();
+}
+void runInquiryFlow() {
+  auto inquiryService = new BondInquiryService();
+  auto inquiryServiceListener = new BondInquiryServiceListener(inquiryService);
+  inquiryService->AddListener(inquiryServiceListener);
+  inquiryService->Subscribe(new BondInquirySubscriber("inquiry.csv", inquiryService));
 }
 
 void runStreamingProcess() {
@@ -28,5 +38,5 @@ void runStreamingProcess() {
   streamingService->AddListener(historicalDataServiceListener);
 
   pricingService->Subscribe(
-      new BondPricesConnector("prices.csv", (Service<string, Price<Bond>> *) pricingService));
+      new BondPricesConnector("prices.csv", pricingService));
 }

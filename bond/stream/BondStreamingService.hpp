@@ -5,10 +5,10 @@
 #ifndef BONDTRADINGSYSTEM_BONDSTREAMINGSERVICE_H
 #define BONDTRADINGSYSTEM_BONDSTREAMINGSERVICE_H
 
-#include "../bond/BondAlgoStreamingService.hpp"
-#include "../base/soa.hpp"
-#include "../base/products.hpp"
-#include "../base/streamingservice.hpp"
+#include "BondAlgoStreamingService.hpp"
+#include "../../base/soa.hpp"
+#include "../../base/products.hpp"
+#include "../../base/streamingservice.hpp"
 
 class BondStreamingService : public StreamingService<Bond> {
  public:

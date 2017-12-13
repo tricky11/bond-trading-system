@@ -5,9 +5,9 @@
 #ifndef BONDTRADINGSYSTEM_GUISERVICE_H
 #define BONDTRADINGSYSTEM_GUISERVICE_H
 
-#include "../base/products.hpp"
-#include "../base/pricingservice.hpp"
-#include "../connectors/OutputFileConnector.hpp"
+#include "../../base/products.hpp"
+#include "../../base/pricingservice.hpp"
+#include "../../connectors/OutputFileConnector.hpp"
 
 class GUIConnector : public OutputFileConnector<Price<Bond>> {
  public:
@@ -60,6 +60,7 @@ string GUIConnector::getCSVHeader() {
   return "Bid,Ask";
 }
 void GUIService::PersistData(Price<Bond> &data) {
+  // TODO: publish only once every 300ms
   connector->Publish(data);
 }
 void GUIService::OnMessage(Price<Bond> &data) {
