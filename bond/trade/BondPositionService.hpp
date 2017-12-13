@@ -9,9 +9,18 @@
 #include "../../base/products.hpp"
 #include "../../base/soa.hpp"
 
-class BondPositionService : public Service<string, Position<Bond>> {
+class BondPositionService : public PositionService<Bond> {
  public:
   void PublishTradeStream(Position<Bond> &position) {
+    for (auto listener : this->GetListeners()) {
+      //TODO: Replace dummies.
+      auto product = Bond("id", BondIdType::CUSIP, "ticker", 2.0, boost::gregorian::date());
+      Position<Bond> position(product);
+      listener->ProcessAdd(position);
+    }
+  }
+
+  void AddTrade(const Trade<Bond> &trade) override {
     for (auto listener : this->GetListeners()) {
       listener->ProcessAdd(position);
     }
@@ -28,11 +37,9 @@ class BondTradesServiceListener : public ServiceListener<Trade<Bond>> {
 
   void ProcessAdd(Trade<Bond> &data) override {
     std::cout << "ProcessAdd in BondTradesServiceListener" << std::endl;
-    auto product = Bond("id", BondIdType::CUSIP, "ticker", 2.0, boost::gregorian::date());
-
-    Position<Bond> position(product);
-    listeningService->PublishTradeStream(position);
+    listeningService->AddTrade(data);
   }
+
   void ProcessRemove(Trade<Bond> &data) override {
 
   }
