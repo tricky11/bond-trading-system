@@ -8,6 +8,7 @@
 #include <sstream>
 #include "../../base/products.hpp"
 #include "../../base/tradebookingservice.hpp"
+#include "../../base/executionservice.hpp"
 #include "../../connectors/InputFileConnector.hpp"
 #include "../../utils/string.h"
 
@@ -60,4 +61,23 @@ void BondTradeBookingService::BookTrade(const Trade<Bond> &trade) {
     listener->ProcessAdd(const_cast<Trade<Bond> &>(trade));
   }
 }
+
+class BondExecutionServiceListener : public ServiceListener<ExecutionOrder<Bond>> {
+ private:
+  BondTradeBookingService *listeningService;
+ public:
+  BondExecutionServiceListener(BondTradeBookingService *listeningService) : listeningService(listeningService) {}
+  void ProcessAdd(ExecutionOrder<Bond> &data) override {
+    Bond product("bondid", BondIdType::CUSIP, "ticker", 2.0, boost::gregorian::date());
+    Trade<Bond> trade(product, "tradeid", 100.0, "bookid", 100000, Side::BUY);
+    listeningService->BookTrade(trade);
+  }
+  void ProcessRemove(ExecutionOrder<Bond> &data) override {
+
+  }
+  void ProcessUpdate(ExecutionOrder<Bond> &data) override {
+
+  }
+};
+
 #endif //BONDTRADINGSYSTEM_BONDTRADEBOOKINGSERVICE_H

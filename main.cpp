@@ -49,10 +49,12 @@ void runTradesAndExecutionFlow() {
   auto marketDataListener = new BondMarketDataServiceListener(algoExecutionService);
   auto algoExecutionListener = new BondAlgoExecutionServiceListener(executionService);
   auto executionListener = new BondExecutionOrderServiceListener(executionHistoricalDataService);
+  auto executionListenerFromTrade = new BondExecutionServiceListener(tradeBookingService);
 
   marketDataService->AddListener(marketDataListener);
   algoExecutionService->AddListener(algoExecutionListener);
   executionService->AddListener(executionListener);
+  executionService->AddListener(executionListenerFromTrade);
 
   tradeBookingService->Subscribe(new BondTradesConnector("trades.csv", tradeBookingService));
   marketDataService->Subscribe(new BondMarketDataConnector("marketdata.csv", marketDataService));
