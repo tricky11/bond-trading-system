@@ -4,15 +4,42 @@
 #include "bond/stream/BondStreamingService.hpp"
 #include "bond/stream/BondPriceStreamsHistoricalDataService.hpp"
 #include "bond/inquiry/BondInquiryService.hpp"
+#include "bond/trade/BondTradeBookingService.hpp"
+#include "bond/trade/BondPositionService.hpp"
+#include "bond/trade/BondPositionHistoricalDataService.hpp"
+#include "bond/trade/BondRiskHistoricalDataService.hpp"
+#include "bond/trade/BondRiskService.hpp"
 
 void runStreamingProcess();
-
 void runInquiryFlow();
+
+void runTradesFlow();
 int main() {
 //  runStreamingProcess();
+//  runInquiryFlow();
+  runTradesFlow();
 
-  runInquiryFlow();
 }
+void runTradesFlow() {
+  auto tradeBookingService = new BondTradeBookingService();
+  auto positionService = new BondPositionService();
+  auto riskService = new BondRiskService();
+  auto positionHistoricalDataService = new BondPositionHistoricalDataService();
+  auto riskHistoricalDataService = new BondRiskHistoricalDataService();
+
+  auto tradeListener = new BondTradesServiceListener(positionService);
+  auto positionListener = new BondPositionServiceListener(positionHistoricalDataService);
+  auto positionListenerFromRisk = new BondPositionRiskServiceListener(riskService);
+  auto riskListener = new BondRiskServiceListener(riskHistoricalDataService);
+
+  tradeBookingService->AddListener(tradeListener);
+  positionService->AddListener(positionListener);
+  positionService->AddListener(positionListenerFromRisk);
+  riskService->AddListener(riskListener);
+
+  tradeBookingService->Subscribe(new BondTradesConnector("trades.csv", tradeBookingService));
+}
+
 void runInquiryFlow() {
   auto inquiryService = new BondInquiryService();
   auto inquiryServiceListener = new BondInquiryServiceListener(inquiryService);

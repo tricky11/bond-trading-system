@@ -65,7 +65,7 @@ class TradeBookingService : public Service<string, Trade<T> > {
  public:
 
   // Book the trade
-  void BookTrade(const Trade<T> &trade) = 0;
+  virtual void BookTrade(const Trade<T> &trade) = 0;
 
 };
 
