@@ -8,6 +8,7 @@
 #include "../../base/products.hpp"
 #include "../../base/pricingservice.hpp"
 #include "../../connectors/OutputFileConnector.hpp"
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 class GUIConnector : public OutputFileConnector<Price<Bond>> {
  public:
@@ -26,6 +27,7 @@ class GUIService : public Service<string, Price<Bond>> {
   // defined in milliseconds
   const unsigned int throttle = 300;
   GUIConnector *connector;
+  boost::posix_time::ptime lastTick = boost::posix_time::microsec_clock::universal_time();
 };
 
 class BondPriceServiceListener : public ServiceListener<Price<Bond>> {
@@ -47,25 +49,35 @@ void BondPriceServiceListener::ProcessRemove(Price<Bond> &data) {
 
 }
 void BondPriceServiceListener::ProcessUpdate(Price<Bond> &data) {
-
+  listeningService->PersistData(data);
 }
 
 GUIConnector::GUIConnector(const string &filePath) : OutputFileConnector(filePath) {}
 
 string GUIConnector::toCSVString(Price<Bond> &data) {
-  return std::to_string(data.GetMid() - data.GetBidOfferSpread() / 2) + "," +
-          std::to_string(data.GetMid() + data.GetBidOfferSpread() / 2);
+  std::ostringstream oss;
+  oss << data.GetProduct().GetProductId() << "," <<
+      (data.GetMid() - data.GetBidOfferSpread() / 2) << "," <<
+      (data.GetMid() + data.GetBidOfferSpread() / 2);
+  return oss.str();
 }
 string GUIConnector::getCSVHeader() {
-  return "Bid,Ask";
+  return "CUSIP,BidPrice,OfferPrice";
 }
+
 void GUIService::PersistData(Price<Bond> &data) {
-  // TODO: publish only once every 300ms
-  connector->Publish(data);
+  auto currentTick = boost::posix_time::microsec_clock::universal_time();
+  boost::posix_time::time_duration diff = currentTick - lastTick;
+  if (diff.total_milliseconds() > 300) {
+    connector->Publish(data);
+    lastTick = currentTick;
+  }
 }
+
 void GUIService::OnMessage(Price<Bond> &data) {
 
 }
+
 GUIService::GUIService(const unsigned int throttle) : throttle(throttle) {
   connector = new GUIConnector("gui.csv");
   connector->WriteHeader();

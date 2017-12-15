@@ -21,12 +21,10 @@ void runInquiryFlow();
 void runTradesAndExecutionFlow();
 
 int main() {
-  setupProducts();
+//  setupProducts();
 //  runStreamingProcess();
 //  runInquiryFlow();
 //  runTradesAndExecutionFlow();
-  string ticker = string("912828M80");
-  std::cout<<BondProductService::GetInstance()->GetData(ticker)<<std::endl;
 }
 
 void setupProducts() {

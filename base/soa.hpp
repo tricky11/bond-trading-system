@@ -58,12 +58,12 @@ class Service {
 
   // Add a listener to the Service for callbacks on add, remove, and update events
   // for data to the Service.
-  virtual void AddListener(ServiceListener<V> *listener) {
+  void AddListener(ServiceListener<V> *listener) {
     listeners.push_back(listener);
   }
 
   // Get all listeners on the Service.
-  virtual const vector<ServiceListener<V> *> &GetListeners() const {
+  const vector<ServiceListener<V> *> &GetListeners() const {
     return listeners;
   }
 

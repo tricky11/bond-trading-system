@@ -41,7 +41,7 @@ void BondPriceStreamsHistoricalDataService::PersistData(string persistKey, const
   connector->Publish(const_cast<PriceStream<Bond> &>(data));
 }
 BondPriceStreamsHistoricalDataService::BondPriceStreamsHistoricalDataService() {
-  connector = new BondPriceStreamsConnector("streaming.csv");
+  connector = new BondPriceStreamsConnector("output/streaming.csv");
   connector->WriteHeader();
 }
 
@@ -49,10 +49,18 @@ BondPriceStreamsConnector::BondPriceStreamsConnector(const string &filePath) : O
 }
 
 string BondPriceStreamsConnector::toCSVString(PriceStream<Bond> &data) {
-  return "dummy string";
+  std::ostringstream oss;
+  oss << data.GetProduct().GetProductId() << "," <<
+      data.GetBidOrder().GetPrice() << "," <<
+      data.GetBidOrder().GetVisibleQuantity() << "," <<
+      data.GetBidOrder().GetHiddenQuantity() << "," <<
+      data.GetOfferOrder().GetPrice() << "," <<
+      data.GetOfferOrder().GetVisibleQuantity() << "," <<
+      data.GetOfferOrder().GetHiddenQuantity();
+  return oss.str();
 }
 string BondPriceStreamsConnector::getCSVHeader() {
-  return "dummy header";
+  return "CUSIP,BidPrice,BidVisibleQuantity,BidHiddenQuantity,OfferPrice,OfferVisibleQuantity,OfferHiddenQuantity";
 }
 
 BondPriceStreamsServiceListener::BondPriceStreamsServiceListener(HistoricalDataService<PriceStream<Bond>> *listeningService)
@@ -60,16 +68,15 @@ BondPriceStreamsServiceListener::BondPriceStreamsServiceListener(HistoricalDataS
     listeningService) {}
 
 void BondPriceStreamsServiceListener::ProcessAdd(PriceStream<Bond> &data) {
-  std::cout << "ProcessAdd in BondPriceStreamsServiceListener" << std::endl;
-
-  listeningService->PersistData("dummy key", data);
+  listeningService->PersistData(data.GetProduct().GetProductId(), data);
 }
 
 void BondPriceStreamsServiceListener::ProcessRemove(PriceStream<Bond> &data) {
 
 }
-void BondPriceStreamsServiceListener::ProcessUpdate(PriceStream<Bond> &data) {
 
+void BondPriceStreamsServiceListener::ProcessUpdate(PriceStream<Bond> &data) {
+  listeningService->PersistData(data.GetProduct().GetProductId(), data);
 }
 
 void BondPriceStreamsHistoricalDataService::OnMessage(PriceStream<Bond> &data) {

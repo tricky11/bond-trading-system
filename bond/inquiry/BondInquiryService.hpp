@@ -29,10 +29,10 @@ class BondInquiryPublisher : public OutputFileConnector<Inquiry<Bond>> {
   explicit BondInquiryPublisher(const string &filePath) : OutputFileConnector(filePath) {}
 
   string toCSVString(Inquiry<Bond> &data) override {
-    // TODO: Fix product reference here.
     std::ostringstream oss;
-    oss << data.GetInquiryId() << "," <<
-        //        data.GetProduct().GetProductId() << "," <<
+    oss <<
+        data.GetProduct().GetProductId() << "," <<
+        data.GetInquiryId() << "," <<
         data.GetSide() << "," <<
         data.GetQuantity() << "," <<
         data.GetPrice() << "," <<

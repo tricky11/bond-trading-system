@@ -10,6 +10,7 @@
 #include "../../base/pricingservice.hpp"
 #include "../../connectors/InputFileConnector.hpp"
 #include "../../utils/string.h"
+#include "../BondProductService.hpp"
 
 class BondPricesConnector : public InputFileConnector<string, Price<Bond>> {
  public:
@@ -26,31 +27,29 @@ class BondPricingService : public PricingService<Bond> {
 
 Price<Bond> BondPricesConnector::parse(string line) {
   auto split = splitString(line, ',');
-  string id = split[0], ticker = split[2], maturityDate = split[4];
-  BondIdType bondIdType = stoi(split[1]) == 0 ? BondIdType::CUSIP : BondIdType::ISIN;
-  float coupon = stof(split[3]);
-  double mid = stod(split[5]), bidOfferSpread = stod(split[6]);
+  string id = split[0];
+  double mid = stod(split[1]), bidOfferSpread = stod(split[2]);
 
-  //TODO: Fix boost date here.
-  //TODO: Bond goes out of scope after return.
-  auto product =
-      Bond(id,
-           bondIdType,
-           ticker,
-           coupon,
-           boost::gregorian::date());
-  return Price<Bond>(product, mid, bidOfferSpread);
+  auto bond = BondProductService::GetInstance()->GetData(id);
+  return Price<Bond>(bond, mid, bidOfferSpread);
 }
+
 BondPricesConnector::BondPricesConnector(const string &filePath, Service<string, Price<Bond>> *connectedService)
     : InputFileConnector(filePath, connectedService) {}
 
 void BondPricingService::OnMessage(Price<Bond> &data) {
-  std::cout << "OnMessage in BondPricingService" << std::endl;
-  dataStore.insert({"dummy", data});
-  for (auto listener : this->GetListeners()) {
-    listener->ProcessAdd(data);
+  dataStore[data.GetProduct().GetProductId()] = data;
+  if (dataStore.find(data.GetProduct().GetProductId()) == unordered_map::end()) {
+    for (auto listener : this->GetListeners()) {
+      listener->ProcessAdd(data);
+    }
+  } else {
+    for (auto listener : this->GetListeners()) {
+      listener->ProcessUpdate(data);
+    }
   }
 }
+
 void BondPricingService::Subscribe(BondPricesConnector *connector) {
   connector->read();
 }

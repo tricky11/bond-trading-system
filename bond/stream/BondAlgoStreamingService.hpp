@@ -13,7 +13,7 @@
 template<typename T>
 class AlgoStream {
  public:
-  AlgoStream(const PriceStream<T> &priceStream) : priceStream(priceStream) {}
+  explicit AlgoStream(const PriceStream<T> &priceStream) : priceStream(priceStream) {}
 
   const PriceStream<T> &getPriceStream() const {
     return priceStream;
@@ -25,14 +25,44 @@ class AlgoStream {
 
 class BondAlgoStreamingService : public Service<string, AlgoStream<Bond>> {
  public:
-  void PublishPriceStream(AlgoStream<Bond> &algoStream) {
-    for (auto listener : this->GetListeners()) {
-      listener->ProcessAdd(algoStream);
+  void PublishPrice(Price<Bond> &newPrice) {
+    auto bond = BondProductService::GetInstance()->GetData(newPrice.GetProduct().GetProductId());
+
+    PriceStreamOrder bidOrder
+        (newPrice.GetMid() - newPrice.GetBidOfferSpread() / 2,
+         states[currentState],
+         2 * states[currentState],
+         PricingSide::BID);
+    PriceStreamOrder offerOrder
+        (newPrice.GetMid() + newPrice.GetBidOfferSpread() / 2,
+         states[currentState],
+         2 * states[currentState],
+         PricingSide::OFFER);
+    PriceStream<Bond> priceStream(bond, bidOrder, offerOrder);
+    AlgoStream<Bond> algoStream(priceStream);
+
+    cycleState();
+    dataStore[bond.GetProductId()] = algoStream;
+    if (dataStore.find(bond.GetProductId()) == unordered_map::end()) {
+      for (auto listener : this->GetListeners()) {
+        listener->ProcessAdd(algoStream);
+      }
+    } else {
+      for (auto listener : this->GetListeners()) {
+        listener->ProcessUpdate(algoStream);
+      }
     }
   }
 
   void OnMessage(AlgoStream<Bond> &data) override {
 
+  }
+
+ private:
+  std::array<int, 5> states = {1000000, 2000000};
+  unsigned int currentState = 0;
+  void cycleState() {
+    currentState = (currentState + 1) % states.size();
   }
 };
 
@@ -41,20 +71,15 @@ class BondPricesServiceListener : public ServiceListener<Price<Bond>> {
   explicit BondPricesServiceListener(BondAlgoStreamingService *listeningService) : listeningService(listeningService) {}
 
   void ProcessAdd(Price<Bond> &data) override {
-    std::cout<<"ProcessAdd in BondPricesServiceListener"<<std::endl;
-    auto product = Bond("id", BondIdType::CUSIP, "ticker", 2.0, boost::gregorian::date());
-
-    PriceStreamOrder bidOrder(data.GetMid() - data.GetBidOfferSpread() / 2, 1000000, 2000000, PricingSide::BID);
-    PriceStreamOrder askOrder(data.GetMid() + data.GetBidOfferSpread() / 2, 1000000, 2000000, PricingSide::OFFER);
-    PriceStream<Bond> priceStream(product, bidOrder, askOrder);
-    AlgoStream<Bond> algoStream(priceStream);
-    listeningService->PublishPriceStream(algoStream);
+    listeningService->PublishPrice(data);
   }
+
   void ProcessRemove(Price<Bond> &data) override {
 
   }
-  void ProcessUpdate(Price<Bond> &data) override {
 
+  void ProcessUpdate(Price<Bond> &data) override {
+    listeningService->PublishPrice(data);
   }
 
  private:

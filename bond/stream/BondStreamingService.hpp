@@ -13,12 +13,19 @@
 class BondStreamingService : public StreamingService<Bond> {
  public:
   void OnMessage(PriceStream<Bond> &data) override {
-    // Do nothing. Since streaming service does not have a connector.
+    // Do nothing. Since this service does not have a connector.
   }
 
   void PublishPrice(const PriceStream<Bond> &priceStream) override {
-    for (auto listener : this->GetListeners()) {
-      listener->ProcessAdd(const_cast<PriceStream<Bond> &>(priceStream));
+    dataStore[priceStream.GetProduct().GetProductId()] = priceStream;
+    if (dataStore.find(priceStream.GetProduct().GetProductId()) == unordered_map::end()) {
+      for (auto listener : this->GetListeners()) {
+        listener->ProcessAdd(const_cast<PriceStream<Bond> &>(priceStream));
+      }
+    } else {
+      for (auto listener : this->GetListeners()) {
+        listener->ProcessUpdate(const_cast<PriceStream<Bond> &>(priceStream));
+      }
     }
   }
 };
@@ -28,14 +35,13 @@ class BondAlgoStreamServiceListener : public ServiceListener<AlgoStream<Bond>> {
   explicit BondAlgoStreamServiceListener(BondStreamingService *listeningService) : listeningService(listeningService) {}
 
   void ProcessAdd(AlgoStream<Bond> &data) override {
-    std::cout<<"ProcessAdd in BondAlgoStreamServiceListener"<<std::endl;
     listeningService->PublishPrice(data.getPriceStream());
   }
   void ProcessRemove(AlgoStream<Bond> &data) override {
 
   }
   void ProcessUpdate(AlgoStream<Bond> &data) override {
-
+    listeningService->PublishPrice(data.getPriceStream());
   }
 
  private:
