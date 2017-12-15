@@ -47,7 +47,6 @@ template<typename T>
 class BucketedSector {
 
  public:
-
   // ctor for a bucket sector
   BucketedSector(const vector<T> &_products, string _name);
 

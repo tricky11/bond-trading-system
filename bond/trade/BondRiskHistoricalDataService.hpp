@@ -41,7 +41,7 @@ void BondRiskHistoricalDataService::PersistData(string persistKey, const PV01<Bo
   connector->Publish(const_cast<PV01<Bond> &>(data));
 }
 BondRiskHistoricalDataService::BondRiskHistoricalDataService() {
-  connector = new BondRiskConnector("risk.csv");
+  connector = new BondRiskConnector("output/risk.csv");
   connector->WriteHeader();
 }
 
@@ -49,10 +49,14 @@ BondRiskConnector::BondRiskConnector(const string &filePath) : OutputFileConnect
 }
 
 string BondRiskConnector::toCSVString(PV01<Bond> &data) {
-  return "dummy string";
+  std::ostringstream oss;
+  oss << data.GetProduct().GetProductId() << "," <<
+      data.GetQuantity() << "," <<
+      data.GetPV01();
+  return oss.str();;
 }
 string BondRiskConnector::getCSVHeader() {
-  return "risk";
+  return "CUSIP,Quantity,PV01";
 }
 
 BondRiskServiceListener::BondRiskServiceListener(HistoricalDataService<PV01<Bond>> *listeningService)
@@ -60,16 +64,14 @@ BondRiskServiceListener::BondRiskServiceListener(HistoricalDataService<PV01<Bond
     listeningService) {}
 
 void BondRiskServiceListener::ProcessAdd(PV01<Bond> &data) {
-  std::cout << "ProcessAdd in BondRiskServiceListener" << std::endl;
-
-  listeningService->PersistData("dummy key", data);
+  listeningService->PersistData(data.GetProduct().GetProductId(), data);
 }
 
 void BondRiskServiceListener::ProcessRemove(PV01<Bond> &data) {
 
 }
 void BondRiskServiceListener::ProcessUpdate(PV01<Bond> &data) {
-
+  listeningService->PersistData(data.GetProduct().GetProductId(), data);
 }
 
 void BondRiskHistoricalDataService::OnMessage(PV01<Bond> &data) {

@@ -35,6 +35,8 @@ class Position {
   // Get the aggregate position
   long GetAggregatePosition();
 
+  // Updates the position after a new trade.
+  void UpdatePosition(const Trade<T> &trade);
  private:
   T product;
   map<string, long> positions;
@@ -73,8 +75,21 @@ long Position<T>::GetPosition(string &book) {
 
 template<typename T>
 long Position<T>::GetAggregatePosition() {
-  // No-op implementation - should be filled out for implementations
-  return 0;
+  long totalPosition = 0;
+  for (const auto &bookEntry : positions) {
+    totalPosition += bookEntry.second;
+  }
+  return totalPosition;
+}
+
+template<typename T>
+void Position<T>::UpdatePosition(const Trade<T> &trade) {
+  long quantity = (trade.GetSide() == BUY ? 1 : -1) * trade.GetQuantity();
+  if (positions.find(trade.GetBook()) == map::end()) {
+    positions[trade.GetBook()] = quantity;
+  } else {
+    positions[trade.GetBook()] += quantity;
+  }
 }
 
 #endif

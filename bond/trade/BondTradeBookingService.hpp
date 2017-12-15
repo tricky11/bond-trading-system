@@ -28,27 +28,19 @@ class BondTradeBookingService : public TradeBookingService<Bond> {
 
 Trade<Bond> BondTradesConnector::parse(string line) {
   auto split = splitString(line, ',');
-  string id = split[0], ticker = split[2], maturityDate = split[4];
-  BondIdType bondIdType = stoi(split[1]) == 0 ? BondIdType::CUSIP : BondIdType::ISIN;
-  float coupon = stof(split[3]);
-  double mid = stod(split[5]), bidOfferSpread = stod(split[6]);
+  string productId = split[0], tradeId = split[1], bookId = split[3];
+  double price = stod(split[2]);
+  long quantity = stol(split[4]);
+  Side side = split[5].compare("0") == 0 ? Side::BUY : Side::SELL;
 
-  //TODO: Fix boost date here.
-  //TODO: Bond goes out of scope after return.
-  auto product =
-      Bond(id,
-           bondIdType,
-           ticker,
-           coupon,
-           boost::gregorian::date());
-  return Trade<Bond>(product, "tradeid", mid, "bookid", 0, Side::BUY);
+  auto bond = BondProductService::GetInstance()->GetData(productId);
+  return Trade<Bond>(bond, tradeId, price, bookId, quantity, side);
 }
 BondTradesConnector::BondTradesConnector(const string &filePath, Service<string, Trade<Bond>> *connectedService)
     : InputFileConnector(filePath, connectedService) {}
 
 void BondTradeBookingService::OnMessage(Trade<Bond> &data) {
-  std::cout << "OnMessage in BondTradeBookingService" << std::endl;
-  dataStore.insert({"dummy", data});
+  dataStore[data.GetTradeId()] = data;
   BookTrade(data);
 }
 
@@ -57,6 +49,7 @@ void BondTradeBookingService::Subscribe(BondTradesConnector *connector) {
 }
 
 void BondTradeBookingService::BookTrade(const Trade<Bond> &trade) {
+  // TODO: Check if trade has already been processed (Not part of project, since we never generate duplicate trades)
   for (auto listener : this->GetListeners()) {
     listener->ProcessAdd(const_cast<Trade<Bond> &>(trade));
   }
@@ -68,13 +61,15 @@ class BondExecutionServiceListener : public ServiceListener<ExecutionOrder<Bond>
  public:
   BondExecutionServiceListener(BondTradeBookingService *listeningService) : listeningService(listeningService) {}
   void ProcessAdd(ExecutionOrder<Bond> &data) override {
-    Bond product("bondid", BondIdType::CUSIP, "ticker", 2.0, boost::gregorian::date());
-    Trade<Bond> trade(product, "tradeid", 100.0, "bookid", 100000, Side::BUY);
+    // TODO: Generate tradeId here
+    Trade<Bond> trade(data.GetProduct(), "tradeid", data.GetPrice(), "bookid", 100000, Side::BUY);
     listeningService->BookTrade(trade);
   }
+
   void ProcessRemove(ExecutionOrder<Bond> &data) override {
 
   }
+
   void ProcessUpdate(ExecutionOrder<Bond> &data) override {
 
   }

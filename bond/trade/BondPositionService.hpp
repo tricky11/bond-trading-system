@@ -12,8 +12,19 @@
 class BondPositionService : public PositionService<Bond> {
  public:
   void AddTrade(const Trade<Bond> &trade) override {
-    for (auto listener : this->GetListeners()) {
-      listener->ProcessAdd((Position<Bond> &) trade);
+    if(dataStore.find(trade.GetProduct().GetProductId())==unordered_map::end()){
+      Position<Bond> newPosition = Position<Bond>(trade.GetProduct());
+      newPosition.UpdatePosition(trade); // TODO: Move this to ctor?
+      dataStore[trade.GetProduct().GetProductId()] = newPosition;
+      for (auto listener : this->GetListeners()) {
+        listener->ProcessAdd(newPosition);
+      }
+    }else{
+      auto position = dataStore[trade.GetProduct().GetProductId()];
+      position.UpdatePosition(trade);
+      for (auto listener : this->GetListeners()) {
+        listener->ProcessUpdate(position);
+      }
     }
   }
 
@@ -27,7 +38,6 @@ class BondTradesServiceListener : public ServiceListener<Trade<Bond>> {
   explicit BondTradesServiceListener(BondPositionService *listeningService) : listeningService(listeningService) {}
 
   void ProcessAdd(Trade<Bond> &data) override {
-    std::cout << "ProcessAdd in BondTradesServiceListener" << std::endl;
     listeningService->AddTrade(data);
   }
 

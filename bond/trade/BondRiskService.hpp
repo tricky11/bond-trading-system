@@ -17,15 +17,31 @@ class BondRiskService : public RiskService<Bond> {
   }
 
   void AddPosition(Position<Bond> &position) override {
-    for (auto listener:this->GetListeners()) {
-      auto product = Bond("id", BondIdType::CUSIP, "ticker", 2.0, boost::gregorian::date());
-      PV01<Bond> risk(product, 0.0, 0l);
-      listener->ProcessAdd(risk);
+    auto product = position.GetProduct();
+    PV01<Bond> risk(product, position.GetAggregatePosition(), position.GetAggregatePosition());
+    if (dataStore.find(position.GetProduct().GetProductId()) == unordered_map::end()) {
+      dataStore[position.GetProduct().GetProductId()] = risk;
+      for (auto listener:this->GetListeners()) {
+        listener->ProcessAdd(risk);
+      }
+    } else {
+      dataStore[position.GetProduct().GetProductId()] = risk;
+      for (auto listener:this->GetListeners()) {
+        listener->ProcessUpdate(risk);
+      }
     }
   }
 
   const PV01<BucketedSector<Bond>> &GetBucketedRisk(const BucketedSector<Bond> &sector) const override {
-    return PV01<BucketedSector<Bond>>(sector, 0.0, 0L);
+    double totalPV01 = 0;
+    long totalPosition = 0;
+    for (const auto &product : sector.GetProducts()) {
+      if (dataStore.find(product.GetProductId()) != unordered_map::end()) {
+        totalPV01 += dataStore[product.GetProductId()].GetPV01();
+        totalPosition += dataStore[product.GetProductId()].GetQuantity();
+      }
+    }
+    return PV01<BucketedSector<Bond>>(sector, totalPV01, totalPosition);
   }
 };
 
@@ -34,14 +50,13 @@ class BondPositionRiskServiceListener : public ServiceListener<Position<Bond>> {
   explicit BondPositionRiskServiceListener(BondRiskService *listeningService) : listeningService(listeningService) {}
 
   void ProcessAdd(Position<Bond> &data) override {
-    std::cout << "ProcessAdd in BondPositionRiskServiceListener" << std::endl;
     listeningService->AddPosition(data);
   }
   void ProcessRemove(Position<Bond> &data) override {
 
   }
   void ProcessUpdate(Position<Bond> &data) override {
-
+    listeningService->AddPosition(data);
   }
 
  private:

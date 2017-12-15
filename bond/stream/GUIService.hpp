@@ -79,7 +79,7 @@ void GUIService::OnMessage(Price<Bond> &data) {
 }
 
 GUIService::GUIService(const unsigned int throttle) : throttle(throttle) {
-  connector = new GUIConnector("gui.csv");
+  connector = new GUIConnector("output/gui.csv");
   connector->WriteHeader();
 }
 

@@ -41,7 +41,7 @@ void BondPositionHistoricalDataService::PersistData(string persistKey, const Pos
   connector->Publish(const_cast<Position<Bond> &>(data));
 }
 BondPositionHistoricalDataService::BondPositionHistoricalDataService() {
-  connector = new BondPositionConnector("positions.csv");
+  connector = new BondPositionConnector("output/positions.csv");
   connector->WriteHeader();
 }
 
@@ -49,10 +49,13 @@ BondPositionConnector::BondPositionConnector(const string &filePath) : OutputFil
 }
 
 string BondPositionConnector::toCSVString(Position<Bond> &data) {
-  return "dummy string";
+  std::ostringstream oss;
+  oss << data.GetProduct().GetProductId() << "," <<
+      data.GetAggregatePosition();
+  return oss.str();;
 }
 string BondPositionConnector::getCSVHeader() {
-  return "position";
+  return "CUSIP,Position";
 }
 
 BondPositionServiceListener::BondPositionServiceListener(HistoricalDataService<Position<Bond>> *listeningService)
@@ -60,16 +63,14 @@ BondPositionServiceListener::BondPositionServiceListener(HistoricalDataService<P
     listeningService) {}
 
 void BondPositionServiceListener::ProcessAdd(Position<Bond> &data) {
-  std::cout << "ProcessAdd in BondPositionServiceListener" << std::endl;
-
-  listeningService->PersistData("dummy key", data);
+  listeningService->PersistData(data.GetProduct().GetProductId(), data);
 }
 
 void BondPositionServiceListener::ProcessRemove(Position<Bond> &data) {
 
 }
 void BondPositionServiceListener::ProcessUpdate(Position<Bond> &data) {
-
+  listeningService->PersistData(data.GetProduct().GetProductId(), data);
 }
 
 void BondPositionHistoricalDataService::OnMessage(Position<Bond> &data) {

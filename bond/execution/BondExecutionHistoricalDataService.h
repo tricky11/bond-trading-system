@@ -43,7 +43,7 @@ void BondExecutionHistoricalDataService::PersistData(string persistKey, const Ex
   connector->Publish(const_cast<ExecutionOrder<Bond> &>(data));
 }
 BondExecutionHistoricalDataService::BondExecutionHistoricalDataService() {
-  connector = new BondExecutionOrderConnector("execution.csv");
+  connector = new BondExecutionOrderConnector("output/execution.csv");
   connector->WriteHeader();
 }
 

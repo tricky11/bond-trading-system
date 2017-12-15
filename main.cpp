@@ -76,15 +76,15 @@ void runTradesAndExecutionFlow() {
   executionService->AddListener(executionListener);
   executionService->AddListener(executionListenerFromTrade);
 
-  tradeBookingService->Subscribe(new BondTradesConnector("trades.csv", tradeBookingService));
-  marketDataService->Subscribe(new BondMarketDataConnector("marketdata.csv", marketDataService));
+  tradeBookingService->Subscribe(new BondTradesConnector("input/trades.csv", tradeBookingService));
+  marketDataService->Subscribe(new BondMarketDataConnector("input/marketdata.csv", marketDataService));
 }
 
 void runInquiryFlow() {
   auto inquiryService = new BondInquiryService();
   auto inquiryServiceListener = new BondInquiryServiceListener(inquiryService);
   inquiryService->AddListener(inquiryServiceListener);
-  inquiryService->Subscribe(new BondInquirySubscriber("inquiry.csv", inquiryService));
+  inquiryService->Subscribe(new BondInquirySubscriber("input/inquiry.csv", inquiryService));
 }
 
 void runStreamingProcess() {
@@ -105,5 +105,5 @@ void runStreamingProcess() {
   streamingService->AddListener(historicalDataServiceListener);
 
   pricingService->Subscribe(
-      new BondPricesConnector("prices.csv", pricingService));
+      new BondPricesConnector("input/prices.csv", pricingService));
 }
