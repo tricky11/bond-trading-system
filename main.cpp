@@ -13,17 +13,39 @@
 #include "bond/execution/BondAlgoExecutionService.hpp"
 #include "bond/execution/BondExecutionService.hpp"
 #include "bond/execution/BondExecutionHistoricalDataService.h"
+#include "bond/BondProductService.hpp"
 
+void setupProducts();
 void runStreamingProcess();
 void runInquiryFlow();
-
 void runTradesAndExecutionFlow();
+
 int main() {
+  setupProducts();
 //  runStreamingProcess();
 //  runInquiryFlow();
-  runTradesAndExecutionFlow();
-
+//  runTradesAndExecutionFlow();
+  string ticker = string("912828M80");
+  std::cout<<BondProductService::GetInstance()->GetData(ticker)<<std::endl;
 }
+
+void setupProducts() {
+  auto productService = BondProductService::GetInstance();
+  Bond T2("9128283H1", CUSIP, "T", 1.750, date(2019, Nov, 30));
+  Bond T3("9128283L2", CUSIP, "T", 1.875, date(2020, Dec, 15));
+  Bond T5("912828M80", CUSIP, "T", 2.0, date(2022, Nov, 30));
+  Bond T7("9128283J7", CUSIP, "T", 2.125, date(2024, Nov, 30));
+  Bond T10("9128283F5", CUSIP, "T", 2.25, date(2027, Dec, 15));
+  Bond T30("912810RZ3", CUSIP, "T", 2.75, date(2047, Dec, 15));
+
+  productService->Add(T2);
+  productService->Add(T3);
+  productService->Add(T5);
+  productService->Add(T7);
+  productService->Add(T10);
+  productService->Add(T30);
+}
+
 void runTradesAndExecutionFlow() {
   auto tradeBookingService = new BondTradeBookingService();
   auto positionService = new BondPositionService();
