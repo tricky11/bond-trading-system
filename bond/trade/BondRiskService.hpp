@@ -19,7 +19,7 @@ class BondRiskService : public RiskService<Bond> {
   void AddPosition(Position<Bond> &position) override {
     auto product = position.GetProduct();
     PV01<Bond> risk(product, position.GetAggregatePosition(), position.GetAggregatePosition());
-    if (dataStore.find(position.GetProduct().GetProductId()) == unordered_map::end()) {
+    if (dataStore.find(position.GetProduct().GetProductId()) == dataStore.end()) {
       dataStore[position.GetProduct().GetProductId()] = risk;
       for (auto listener:this->GetListeners()) {
         listener->ProcessAdd(risk);
@@ -36,7 +36,7 @@ class BondRiskService : public RiskService<Bond> {
     double totalPV01 = 0;
     long totalPosition = 0;
     for (const auto &product : sector.GetProducts()) {
-      if (dataStore.find(product.GetProductId()) != unordered_map::end()) {
+      if (dataStore.find(product.GetProductId()) != dataStore.end()) {
         totalPV01 += dataStore[product.GetProductId()].GetPV01();
         totalPosition += dataStore[product.GetProductId()].GetQuantity();
       }

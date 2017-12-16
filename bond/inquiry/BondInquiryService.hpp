@@ -18,9 +18,14 @@ class BondInquirySubscriber : public InputFileConnector<string, Inquiry<Bond>> {
 
  private:
   Inquiry<Bond> parse(string line) override {
-    // TODO: Parse input here.
-    auto product = Bond("bondid", BondIdType::CUSIP, "bondticker", 2.0, boost::gregorian::date());
-    return Inquiry<Bond>("inquiryid", product, Side::BUY, 0, 0, InquiryState::RECEIVED);
+    auto split = splitString(line, ',');
+    string inquiryId = split[0];
+    string productId = split[1];
+    Side side = (split[2].compare("0") == 0) ? BUY : SELL;
+    long quantity = stol(split[3]);
+    double price = stol(split[4]);
+    auto bond = BondProductService::GetInstance()->GetData(productId);
+    return Inquiry<Bond>(inquiryId, bond, side, quantity, price, InquiryState::RECEIVED);
   }
 };
 
@@ -31,8 +36,8 @@ class BondInquiryPublisher : public OutputFileConnector<Inquiry<Bond>> {
   string toCSVString(Inquiry<Bond> &data) override {
     std::ostringstream oss;
     oss <<
-        data.GetProduct().GetProductId() << "," <<
         data.GetInquiryId() << "," <<
+        data.GetProduct().GetProductId() << "," <<
         data.GetSide() << "," <<
         data.GetQuantity() << "," <<
         data.GetPrice() << "," <<
@@ -48,11 +53,12 @@ class BondInquiryPublisher : public OutputFileConnector<Inquiry<Bond>> {
 class BondInquiryService : public InquiryService<Bond> {
  public:
   BondInquiryService() {
-    publishConnector = new BondInquiryPublisher("allinquires.csv");
+    publishConnector = new BondInquiryPublisher("output/allinquires.csv");
     publishConnector->WriteHeader();
   }
 
   void OnMessage(Inquiry<Bond> &data) override {
+    dataStore[data.GetProduct().GetProductId()] = data;
     if (data.GetState() == InquiryState::RECEIVED) {
       for (auto listener : this->GetListeners()) {
         listener->ProcessAdd(data);
@@ -60,6 +66,9 @@ class BondInquiryService : public InquiryService<Bond> {
     } else if (data.GetState() == InquiryState::QUOTED) {
       data.SetState(InquiryState::DONE);
       publishConnector->Publish(data);
+      for (auto listener : this->GetListeners()) {
+        listener->ProcessUpdate(data);
+      }
     }
   }
 

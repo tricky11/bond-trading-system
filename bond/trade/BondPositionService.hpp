@@ -12,7 +12,7 @@
 class BondPositionService : public PositionService<Bond> {
  public:
   void AddTrade(const Trade<Bond> &trade) override {
-    if(dataStore.find(trade.GetProduct().GetProductId())==unordered_map::end()){
+    if(dataStore.find(trade.GetProduct().GetProductId())==dataStore.end()){
       Position<Bond> newPosition = Position<Bond>(trade.GetProduct());
       newPosition.UpdatePosition(trade); // TODO: Move this to ctor?
       dataStore[trade.GetProduct().GetProductId()] = newPosition;

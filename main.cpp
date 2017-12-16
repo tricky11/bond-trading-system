@@ -21,8 +21,8 @@ void runInquiryFlow();
 void runTradesAndExecutionFlow();
 
 int main() {
-//  setupProducts();
-//  runStreamingProcess();
+  setupProducts();
+  runStreamingProcess();
 //  runInquiryFlow();
 //  runTradesAndExecutionFlow();
 }

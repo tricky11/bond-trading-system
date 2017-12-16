@@ -43,7 +43,7 @@ class BondAlgoStreamingService : public Service<string, AlgoStream<Bond>> {
 
     cycleState();
     dataStore[bond.GetProductId()] = algoStream;
-    if (dataStore.find(bond.GetProductId()) == unordered_map::end()) {
+    if (dataStore.find(bond.GetProductId()) == dataStore.end()) {
       for (auto listener : this->GetListeners()) {
         listener->ProcessAdd(algoStream);
       }

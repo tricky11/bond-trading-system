@@ -46,7 +46,7 @@ BondMarketDataConnector::BondMarketDataConnector(const string &filePath,
     : InputFileConnector(filePath, connectedService) {}
 
 void BondMarketDataService::OnMessage(OrderBook<Bond> &data) {
-  if (dataStore.find(data.GetProduct().GetProductId()) == unordered_map::end()) {
+  if (dataStore.find(data.GetProduct().GetProductId()) == dataStore.end()) {
     dataStore[data.GetProduct().GetProductId()] = data;
     for (auto listener:this->GetListeners()) {
       listener->ProcessAdd(data);
@@ -63,7 +63,7 @@ void BondMarketDataService::Subscribe(BondMarketDataConnector *connector) {
   connector->read();
 }
 const BidOffer &BondMarketDataService::GetBestBidOffer(const string &productId) {
-  if (dataStore.find(productId) == unordered_map::end()) {
+  if (dataStore.find(productId) == dataStore.end()) {
     return nullptr;
   } else {
     OrderBook<Bond> orderBook = dataStore[productId];
@@ -76,7 +76,7 @@ const BidOffer &BondMarketDataService::GetBestBidOffer(const string &productId) 
   }
 }
 const OrderBook<Bond> &BondMarketDataService::AggregateDepth(const string &productId) {
-  if (dataStore.find(productId) == unordered_map::end()) {
+  if (dataStore.find(productId) == dataStore.end()) {
     return nullptr;
   } else {
     OrderBook<Bond> orderBook = dataStore[productId];

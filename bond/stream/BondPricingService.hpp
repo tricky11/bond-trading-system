@@ -38,7 +38,7 @@ BondPricesConnector::BondPricesConnector(const string &filePath, Service<string,
     : InputFileConnector(filePath, connectedService) {}
 
 void BondPricingService::OnMessage(Price<Bond> &data) {
-  if (dataStore.find(data.GetProduct().GetProductId()) == unordered_map::end()) {
+  if (dataStore.find(data.GetProduct().GetProductId()) == dataStore.end()) {
     dataStore[data.GetProduct().GetProductId()] = data;
     for (auto listener : this->GetListeners()) {
       listener->ProcessAdd(data);
