@@ -37,8 +37,8 @@ class BondRiskService : public RiskService<Bond> {
     long totalPosition = 0;
     for (const auto &product : sector.GetProducts()) {
       if (dataStore.find(product.GetProductId()) != dataStore.end()) {
-        totalPV01 += dataStore[product.GetProductId()].GetPV01();
-        totalPosition += dataStore[product.GetProductId()].GetQuantity();
+        totalPV01 += dataStore.at(product.GetProductId()).GetPV01();
+        totalPosition += dataStore.at(product.GetProductId()).GetQuantity();
       }
     }
     return PV01<BucketedSector<Bond>>(sector, totalPV01, totalPosition);

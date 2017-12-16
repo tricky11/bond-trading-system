@@ -85,7 +85,7 @@ long Position<T>::GetAggregatePosition() {
 template<typename T>
 void Position<T>::UpdatePosition(const Trade<T> &trade) {
   long quantity = (trade.GetSide() == BUY ? 1 : -1) * trade.GetQuantity();
-  if (positions.find(trade.GetBook()) == map::end()) {
+  if (positions.find(trade.GetBook()) == positions.end()) {
     positions[trade.GetBook()] = quantity;
   } else {
     positions[trade.GetBook()] += quantity;

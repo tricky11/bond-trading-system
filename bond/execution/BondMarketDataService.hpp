@@ -63,9 +63,7 @@ void BondMarketDataService::Subscribe(BondMarketDataConnector *connector) {
   connector->read();
 }
 const BidOffer &BondMarketDataService::GetBestBidOffer(const string &productId) {
-  if (dataStore.find(productId) == dataStore.end()) {
-    return nullptr;
-  } else {
+  if (!(dataStore.find(productId) == dataStore.end())) {
     OrderBook<Bond> orderBook = dataStore[productId];
     BidOffer bidOffer
         (Order(orderBook.GetBidStack()[0].GetPrice(), orderBook.GetBidStack()[0].GetQuantity(), PricingSide::BID),
@@ -76,9 +74,7 @@ const BidOffer &BondMarketDataService::GetBestBidOffer(const string &productId) 
   }
 }
 const OrderBook<Bond> &BondMarketDataService::AggregateDepth(const string &productId) {
-  if (dataStore.find(productId) == dataStore.end()) {
-    return nullptr;
-  } else {
+  if (!(dataStore.find(productId) == dataStore.end())) {
     OrderBook<Bond> orderBook = dataStore[productId];
     double totalBidCost = 0.0;
     long totalBidVolume = 0;
