@@ -58,7 +58,7 @@ class BondInquiryService : public InquiryService<Bond> {
   }
 
   void OnMessage(Inquiry<Bond> &data) override {
-    dataStore[data.GetProduct().GetProductId()] = data;
+    dataStore.insert(make_pair(data.GetProduct().GetProductId(), data));
     if (data.GetState() == InquiryState::RECEIVED) {
       for (auto listener : this->GetListeners()) {
         listener->ProcessAdd(data);

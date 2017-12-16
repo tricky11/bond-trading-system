@@ -17,7 +17,7 @@ class BondStreamingService : public StreamingService<Bond> {
   }
 
   void PublishPrice(const PriceStream<Bond> &priceStream) override {
-    dataStore[priceStream.GetProduct().GetProductId()] = priceStream;
+    dataStore.insert(make_pair(priceStream.GetProduct().GetProductId(), priceStream));
     if (dataStore.find(priceStream.GetProduct().GetProductId()) == dataStore.end()) {
       for (auto listener : this->GetListeners()) {
         listener->ProcessAdd(const_cast<PriceStream<Bond> &>(priceStream));

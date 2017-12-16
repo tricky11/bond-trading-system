@@ -41,7 +41,7 @@ BondTradesConnector::BondTradesConnector(const string &filePath, Service<string,
 
 void BondTradeBookingService::OnMessage(Trade<Bond> &data) {
   // TODO: Check if trade has already been processed (Not part of project, since we never generate duplicate trades)
-  dataStore[data.GetTradeId()] = data;
+  dataStore.insert(make_pair(data.GetTradeId(), data));
   BookTrade(data);
 }
 

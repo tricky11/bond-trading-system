@@ -16,13 +16,13 @@
 #include "bond/BondProductService.hpp"
 
 void setupProducts();
-void runStreamingProcess();
+void runStreamingFlow();
 void runInquiryFlow();
 void runTradesAndExecutionFlow();
 
 int main() {
   setupProducts();
-  runStreamingProcess();
+  runStreamingFlow();
 //  runInquiryFlow();
 //  runTradesAndExecutionFlow();
 }
@@ -87,7 +87,7 @@ void runInquiryFlow() {
   inquiryService->Subscribe(new BondInquirySubscriber("input/inquiry.csv", inquiryService));
 }
 
-void runStreamingProcess() {
+void runStreamingFlow() {
   auto pricingService = new BondPricingService();
   auto guiService = new GUIService(300);
   auto algoStreamingService = new BondAlgoStreamingService();

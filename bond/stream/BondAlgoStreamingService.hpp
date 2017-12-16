@@ -42,7 +42,7 @@ class BondAlgoStreamingService : public Service<string, AlgoStream<Bond>> {
     AlgoStream<Bond> algoStream(priceStream);
 
     cycleState();
-    dataStore[bond.GetProductId()] = algoStream;
+    dataStore.insert(make_pair(bond.GetProductId(), algoStream));
     if (dataStore.find(bond.GetProductId()) == dataStore.end()) {
       for (auto listener : this->GetListeners()) {
         listener->ProcessAdd(algoStream);

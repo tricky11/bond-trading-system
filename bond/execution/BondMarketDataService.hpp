@@ -47,12 +47,12 @@ BondMarketDataConnector::BondMarketDataConnector(const string &filePath,
 
 void BondMarketDataService::OnMessage(OrderBook<Bond> &data) {
   if (dataStore.find(data.GetProduct().GetProductId()) == dataStore.end()) {
-    dataStore[data.GetProduct().GetProductId()] = data;
+    dataStore.insert(make_pair(data.GetProduct().GetProductId(), data));
     for (auto listener:this->GetListeners()) {
       listener->ProcessAdd(data);
     }
   } else {
-    dataStore[data.GetProduct().GetProductId()] = data;
+    dataStore.insert(make_pair(data.GetProduct().GetProductId(), data));
     for (auto listener:this->GetListeners()) {
       listener->ProcessUpdate(data);
     }
@@ -64,7 +64,7 @@ void BondMarketDataService::Subscribe(BondMarketDataConnector *connector) {
 }
 const BidOffer &BondMarketDataService::GetBestBidOffer(const string &productId) {
   if (!(dataStore.find(productId) == dataStore.end())) {
-    OrderBook<Bond> orderBook = dataStore[productId];
+    OrderBook<Bond> orderBook = dataStore.at(productId);
     BidOffer bidOffer
         (Order(orderBook.GetBidStack()[0].GetPrice(), orderBook.GetBidStack()[0].GetQuantity(), PricingSide::BID),
          Order(orderBook.GetOfferStack()[0].GetPrice(),
@@ -75,7 +75,7 @@ const BidOffer &BondMarketDataService::GetBestBidOffer(const string &productId) 
 }
 const OrderBook<Bond> &BondMarketDataService::AggregateDepth(const string &productId) {
   if (!(dataStore.find(productId) == dataStore.end())) {
-    OrderBook<Bond> orderBook = dataStore[productId];
+    OrderBook<Bond> orderBook = dataStore.at(productId);
     double totalBidCost = 0.0;
     long totalBidVolume = 0;
     double totalOfferCost = 0.0;

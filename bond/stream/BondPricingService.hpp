@@ -39,12 +39,12 @@ BondPricesConnector::BondPricesConnector(const string &filePath, Service<string,
 
 void BondPricingService::OnMessage(Price<Bond> &data) {
   if (dataStore.find(data.GetProduct().GetProductId()) == dataStore.end()) {
-    dataStore[data.GetProduct().GetProductId()] = data;
+    dataStore.insert(make_pair(data.GetProduct().GetProductId(),data));
     for (auto listener : this->GetListeners()) {
       listener->ProcessAdd(data);
     }
   } else {
-    dataStore[data.GetProduct().GetProductId()] = data;
+    dataStore.insert(make_pair(data.GetProduct().GetProductId(),data));
     for (auto listener : this->GetListeners()) {
       listener->ProcessUpdate(data);
     }
