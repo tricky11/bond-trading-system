@@ -26,18 +26,28 @@ class AlgoExecution {
 class BondAlgoExecutionService : public Service<string, AlgoExecution<Bond>> {
  public:
   void ProcessOrderBook(OrderBook<Bond> &orderBook) {
-    auto product = Bond("id", BondIdType::CUSIP, "ticker", 2.0, boost::gregorian::date());
-
-    ExecutionOrder<Bond> executionOrder
-        (product, PricingSide::BID, "orderid", OrderType::LIMIT, 100.0, 100000, 200000, "parentorderId", true);
-    AlgoExecution<Bond> algoExecution(executionOrder);
-    for (auto listener : this->GetListeners()) {
-      listener->ProcessAdd(algoExecution);
+    double spread = orderBook.GetOfferStack()[0].GetPrice() - orderBook.GetBidStack()[0].GetPrice();
+    if (spread <= 1 / 128) {
+      // TODO: Generate orderId here
+      ExecutionOrder<Bond> executionOrder
+          (orderBook.GetProduct(), states[currentState], "orderid", MARKET, 0.0, 0, 0, "dummy", false);
+      AlgoExecution<Bond> algoExecution(executionOrder);
+      for (auto listener : this->GetListeners()) {
+        listener->ProcessAdd(algoExecution);
+      }
+      cycleState();
     }
   }
 
   void OnMessage(AlgoExecution<Bond> &data) override {
 
+  }
+
+ private:
+  std::array<PricingSide, 2> states = {PricingSide::BID, PricingSide::OFFER};
+  unsigned int currentState = 0;
+  void cycleState() {
+    currentState = (currentState + 1) % states.size();
   }
 };
 
@@ -47,7 +57,6 @@ class BondMarketDataServiceListener : public ServiceListener<OrderBook<Bond>> {
       : listeningService(listeningService) {}
 
   void ProcessAdd(OrderBook<Bond> &data) override {
-    std::cout << "ProcessAdd in BondMarketDataServiceListener" << std::endl;
     listeningService->ProcessOrderBook(data);
   }
 
@@ -55,7 +64,7 @@ class BondMarketDataServiceListener : public ServiceListener<OrderBook<Bond>> {
 
   }
   void ProcessUpdate(OrderBook<Bond> &data) override {
-
+    listeningService->ProcessOrderBook(data);
   }
 
  private:

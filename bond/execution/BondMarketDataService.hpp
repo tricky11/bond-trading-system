@@ -28,20 +28,17 @@ class BondMarketDataService : public MarketDataService<Bond> {
 
 OrderBook<Bond> BondMarketDataConnector::parse(string line) {
   auto split = splitString(line, ',');
-  string id = split[0], ticker = split[2], maturityDate = split[4];
-  BondIdType bondIdType = stoi(split[1]) == 0 ? BondIdType::CUSIP : BondIdType::ISIN;
-  float coupon = stof(split[3]);
-  double mid = stod(split[5]), bidOfferSpread = stod(split[6]);
-
-  //TODO: Fix boost date here.
-  //TODO: Bond goes out of scope after return.
-  auto product =
-      Bond(id,
-           bondIdType,
-           ticker,
-           coupon,
-           boost::gregorian::date());
-  return OrderBook<Bond>(product, vector<Order>(), vector<Order>());
+  string id = split[0];
+  auto bond = BondProductService::GetInstance()->GetData(id);
+  vector<Order> bidStack;
+  vector<Order> offerStack;
+  for (int i = 1; i <= 5; ++i) {
+    Order bid(stod(split[i]), stol(split[i + 1]), PricingSide::BID);
+    Order offer(stod(split[10 + i]), stol(split[11 + i]), PricingSide::OFFER);
+    bidStack.push_back(bid);
+    offerStack.push_back(offer);
+  }
+  return OrderBook<Bond>(bond, bidStack, offerStack);
 }
 
 BondMarketDataConnector::BondMarketDataConnector(const string &filePath,
@@ -49,10 +46,16 @@ BondMarketDataConnector::BondMarketDataConnector(const string &filePath,
     : InputFileConnector(filePath, connectedService) {}
 
 void BondMarketDataService::OnMessage(OrderBook<Bond> &data) {
-  std::cout << "OnMessage in BondMarketDataService" << std::endl;
-  dataStore.insert({"dummy", data});
-  for(auto listener:this->GetListeners()){
-    listener->ProcessAdd(data);
+  if (dataStore.find(data.GetProduct().GetProductId()) == unordered_map::end()) {
+    dataStore[data.GetProduct().GetProductId()] = data;
+    for (auto listener:this->GetListeners()) {
+      listener->ProcessAdd(data);
+    }
+  } else {
+    dataStore[data.GetProduct().GetProductId()] = data;
+    for (auto listener:this->GetListeners()) {
+      listener->ProcessUpdate(data);
+    }
   }
 }
 
@@ -60,13 +63,40 @@ void BondMarketDataService::Subscribe(BondMarketDataConnector *connector) {
   connector->read();
 }
 const BidOffer &BondMarketDataService::GetBestBidOffer(const string &productId) {
-  BidOffer bidOffer(Order(99.0, 100000, PricingSide::BID), Order(101.0, 200000, PricingSide::OFFER));
-  return bidOffer;
+  if (dataStore.find(productId) == unordered_map::end()) {
+    return nullptr;
+  } else {
+    OrderBook<Bond> orderBook = dataStore[productId];
+    BidOffer bidOffer
+        (Order(orderBook.GetBidStack()[0].GetPrice(), orderBook.GetBidStack()[0].GetQuantity(), PricingSide::BID),
+         Order(orderBook.GetOfferStack()[0].GetPrice(),
+               orderBook.GetOfferStack()[0].GetQuantity(),
+               PricingSide::OFFER));
+    return bidOffer;
+  }
 }
 const OrderBook<Bond> &BondMarketDataService::AggregateDepth(const string &productId) {
-  Bond product("bondid", BondIdType::CUSIP, "ticker", 2.0, boost::gregorian::date());
-  OrderBook<Bond> book(product, vector<Order>(), vector<Order>());
-  return book;
+  if (dataStore.find(productId) == unordered_map::end()) {
+    return nullptr;
+  } else {
+    OrderBook<Bond> orderBook = dataStore[productId];
+    double totalBidCost = 0.0;
+    long totalBidVolume = 0;
+    double totalOfferCost = 0.0;
+    long totalOfferVolume = 0;
+    for (int i = 0; i < 5; ++i) {
+      totalBidVolume += orderBook.GetBidStack()[i].GetQuantity();
+      totalBidCost += orderBook.GetBidStack()[i].GetQuantity() * orderBook.GetBidStack()[i].GetPrice();
+      totalOfferVolume += orderBook.GetOfferStack()[i].GetQuantity();
+      totalOfferCost += orderBook.GetOfferStack()[i].GetQuantity() * orderBook.GetOfferStack()[i].GetPrice();
+    }
+    double averageBidPrice = totalBidVolume / totalBidCost;
+    double averageOfferPrice = totalOfferVolume / totalOfferCost;
+    vector<Order> aggregatedBidStack({Order(averageBidPrice, totalBidVolume, PricingSide::BID)});
+    vector<Order> aggregatedOfferStack({Order(averageOfferPrice, totalOfferVolume, PricingSide::OFFER)});
+    OrderBook<Bond> aggregateOrderBook(orderBook.GetProduct(), aggregatedBidStack, aggregatedOfferStack);
+    return aggregateOrderBook;
+  }
 }
 
 #endif //BONDTRADINGSYSTEM_BONDMARKETDATASERVICE_H

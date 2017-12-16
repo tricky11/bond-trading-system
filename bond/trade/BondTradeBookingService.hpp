@@ -40,6 +40,7 @@ BondTradesConnector::BondTradesConnector(const string &filePath, Service<string,
     : InputFileConnector(filePath, connectedService) {}
 
 void BondTradeBookingService::OnMessage(Trade<Bond> &data) {
+  // TODO: Check if trade has already been processed (Not part of project, since we never generate duplicate trades)
   dataStore[data.GetTradeId()] = data;
   BookTrade(data);
 }
@@ -49,7 +50,6 @@ void BondTradeBookingService::Subscribe(BondTradesConnector *connector) {
 }
 
 void BondTradeBookingService::BookTrade(const Trade<Bond> &trade) {
-  // TODO: Check if trade has already been processed (Not part of project, since we never generate duplicate trades)
   for (auto listener : this->GetListeners()) {
     listener->ProcessAdd(const_cast<Trade<Bond> &>(trade));
   }
@@ -58,11 +58,22 @@ void BondTradeBookingService::BookTrade(const Trade<Bond> &trade) {
 class BondExecutionServiceListener : public ServiceListener<ExecutionOrder<Bond>> {
  private:
   BondTradeBookingService *listeningService;
+  std::array<string, 3> states = {"TRSY1", "TRSY2", "TRSY3"};
+  unsigned int currentState = 0;
+  void cycleState() {
+    currentState = (currentState + 1) % states.size();
+  }
+
  public:
   BondExecutionServiceListener(BondTradeBookingService *listeningService) : listeningService(listeningService) {}
   void ProcessAdd(ExecutionOrder<Bond> &data) override {
     // TODO: Generate tradeId here
-    Trade<Bond> trade(data.GetProduct(), "tradeid", data.GetPrice(), "bookid", 100000, Side::BUY);
+    Trade<Bond> trade(data.GetProduct(),
+                      "tradeid",
+                      data.GetPrice(),
+                      states[currentState],
+                      data.GetVisibleQuantity() + data.GetHiddenQuantity(),
+                      data.GetSide() == OFFER ? BUY : SELL);
     listeningService->BookTrade(trade);
   }
 

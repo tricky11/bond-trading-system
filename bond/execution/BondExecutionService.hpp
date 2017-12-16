@@ -28,7 +28,6 @@ class BondAlgoExecutionServiceListener : public ServiceListener<AlgoExecution<Bo
       : listeningService(listeningService) {}
 
   void ProcessAdd(AlgoExecution<Bond> &data) override {
-    std::cout << "ProcessAdd in BondAlgoExecutionServiceListener" << std::endl;
     listeningService->ExecuteOrder(data.getExecutionOrder(), Market::CME);
   }
   void ProcessRemove(AlgoExecution<Bond> &data) override {

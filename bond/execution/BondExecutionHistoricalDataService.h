@@ -5,7 +5,6 @@
 #ifndef BONDTRADINGSYSTEM_BONDEXECUTIONHISTORICALDATASERVICE_H
 #define BONDTRADINGSYSTEM_BONDEXECUTIONHISTORICALDATASERVICE_H
 
-
 #include "../../base/historicaldataservice.hpp"
 #include "../../base/products.hpp"
 #include "../../connectors/OutputFileConnector.hpp"
@@ -51,10 +50,20 @@ BondExecutionOrderConnector::BondExecutionOrderConnector(const string &filePath)
 }
 
 string BondExecutionOrderConnector::toCSVString(ExecutionOrder<Bond> &data) {
-  return "dummy string";
+  std::ostringstream oss;
+  oss << data.GetProduct().GetProductId() << "," <<
+      data.GetSide() << "," <<
+      data.GetOrderId() << "," <<
+      data.GetOrderType() << "," <<
+      data.GetPrice() << "," <<
+      data.GetVisibleQuantity() << "," <<
+      data.GetHiddenQuantity() << "," <<
+      data.GetParentOrderId() << "," <<
+      data.IsChildOrder();
+  return oss.str();;
 }
 string BondExecutionOrderConnector::getCSVHeader() {
-  return "execution";
+  return "CUSIP,PricingSide,OrderId,OrderType,Price,VisibleQuantity,HiddenQuantity,ParentOrderId,IsChildOrder";
 }
 
 BondExecutionOrderServiceListener::BondExecutionOrderServiceListener(HistoricalDataService<ExecutionOrder<Bond>> *listeningService)
@@ -62,9 +71,7 @@ BondExecutionOrderServiceListener::BondExecutionOrderServiceListener(HistoricalD
     listeningService) {}
 
 void BondExecutionOrderServiceListener::ProcessAdd(ExecutionOrder<Bond> &data) {
-  std::cout << "ProcessAdd in BondExecutionOrderServiceListener" << std::endl;
-
-  listeningService->PersistData("dummy key", data);
+  listeningService->PersistData(data.GetProduct().GetProductId(), data);
 }
 
 void BondExecutionOrderServiceListener::ProcessRemove(ExecutionOrder<Bond> &data) {

@@ -58,6 +58,7 @@ class ExecutionOrder {
 
   // Is child order?
   bool IsChildOrder() const;
+  PricingSide GetSide() const;
 
  private:
   T product;
@@ -146,6 +147,11 @@ const string &ExecutionOrder<T>::GetParentOrderId() const {
 template<typename T>
 bool ExecutionOrder<T>::IsChildOrder() const {
   return isChildOrder;
+}
+
+template<typename T>
+PricingSide ExecutionOrder<T>::GetSide() const {
+  return side;
 }
 
 #endif
