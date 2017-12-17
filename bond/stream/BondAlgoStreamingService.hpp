@@ -26,6 +26,11 @@ class AlgoStream {
 class BondAlgoStreamingService : public Service<string, AlgoStream<Bond>> {
  public:
   BondAlgoStreamingService() {}
+
+  /**
+   * Publish a new price stream alternating between volumes of 1000000 & 2000000.
+   * @param newPrice
+   */
   void PublishPrice(Price<Bond> &newPrice) {
     auto bond = BondProductService::GetInstance()->GetData(newPrice.GetProduct().GetProductId());
 

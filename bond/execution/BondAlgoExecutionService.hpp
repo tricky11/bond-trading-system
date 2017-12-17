@@ -23,9 +23,19 @@ class AlgoExecution {
   const ExecutionOrder<T> &executionOrder;
 };
 
+/**
+ * Listens to updates from the BondMarketDataService
+ * and acts on the OrderBook information as it becomes available.
+ */
 class BondAlgoExecutionService : public Service<string, AlgoExecution<Bond>> {
  public:
   BondAlgoExecutionService() {}
+
+  /**
+ * Process an OrderBook update.
+ * If the spread is tightest, execute the full volume available.
+ * Alternate between BID and OFFER.
+ */
   void ProcessOrderBook(OrderBook<Bond> &orderBook) {
     auto topBid = orderBook.GetBidStack()[0];
     auto topOffer = orderBook.GetOfferStack()[0];
@@ -80,8 +90,9 @@ class BondMarketDataServiceListener : public ServiceListener<OrderBook<Bond>> {
   }
 
   void ProcessRemove(OrderBook<Bond> &data) override {
-
+    // An OrderBook is never removed.
   }
+
   void ProcessUpdate(OrderBook<Bond> &data) override {
     listeningService->ProcessOrderBook(data);
   }

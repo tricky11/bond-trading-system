@@ -17,6 +17,10 @@ class BondRiskService : public RiskService<Bond> {
     // Do nothing. Since streaming service does not have a connector.
   }
 
+  /**
+   * Update risk based on each products pre-determined pv01 values and their current positions.
+   * @param position
+   */
   void AddPosition(Position<Bond> &position) override {
     auto product = position.GetProduct();
     // source of PV01 values : https://eiptrading.com/risk-management/
@@ -34,6 +38,11 @@ class BondRiskService : public RiskService<Bond> {
     }
   }
 
+  /**
+   * Aggregate the risk of all products that belong to a sector.
+   * @param sector
+   * @return
+   */
   const PV01<BucketedSector<Bond>> &GetBucketedRisk(const BucketedSector<Bond> &sector) const override {
     double totalPV01 = 0;
     long totalPosition = 0;
@@ -56,9 +65,10 @@ class BondPositionRiskServiceListener : public ServiceListener<Position<Bond>> {
     listeningService->AddPosition(data);
   }
   void ProcessRemove(Position<Bond> &data) override {
-
+    // NO-OP : Positions are never updated in this project.
   }
   void ProcessUpdate(Position<Bond> &data) override {
+    // AddPosition updates the risk of existing positions.
     listeningService->AddPosition(data);
   }
 

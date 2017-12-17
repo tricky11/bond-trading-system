@@ -47,6 +47,10 @@ BondMarketDataConnector::BondMarketDataConnector(const string &filePath,
                                                  Service<string, OrderBook<Bond>> *connectedService)
     : InputFileConnector(filePath, connectedService) {}
 
+/**
+ * Store the OrderBook and notify listeners to process the new state of the OrderBook.
+ * @param data
+ */
 void BondMarketDataService::OnMessage(OrderBook<Bond> &data) {
   if (dataStore.find(data.GetProduct().GetProductId()) == dataStore.end()) {
     dataStore.insert(make_pair(data.GetProduct().GetProductId(), data));
@@ -64,6 +68,12 @@ void BondMarketDataService::OnMessage(OrderBook<Bond> &data) {
 void BondMarketDataService::Subscribe(BondMarketDataConnector *connector) {
   connector->read();
 }
+
+/**
+ * Get the best bid and offer(with their price and quantity) in the current OrderBook.
+ * @param productId
+ * @return
+ */
 const BidOffer &BondMarketDataService::GetBestBidOffer(const string &productId) {
   if (!(dataStore.find(productId) == dataStore.end())) {
     OrderBook<Bond> orderBook = dataStore.at(productId);
@@ -75,6 +85,15 @@ const BidOffer &BondMarketDataService::GetBestBidOffer(const string &productId) 
     return *bidOffer;
   }
 }
+
+/**
+ * Aggregates the depth of a product in given OrderBook.
+ * For volume, we calculate the sum of all individual orders.
+ * For price, we calculate the Volume Weighted Average Price (VWAP).
+ *
+ * @param productId
+ * @return
+ */
 const OrderBook<Bond> &BondMarketDataService::AggregateDepth(const string &productId) {
   if (!(dataStore.find(productId) == dataStore.end())) {
     OrderBook<Bond> orderBook = dataStore.at(productId);

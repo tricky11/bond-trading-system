@@ -12,6 +12,11 @@
 class BondPositionService : public PositionService<Bond> {
  public:
   BondPositionService() {}
+
+  /**
+   * Add a new position or update a given position if it already exists.
+   * @param trade a new trade that has been recently executed
+   */
   void AddTrade(const Trade<Bond> &trade) override {
     if (dataStore.find(trade.GetProduct().GetProductId()) == dataStore.end()) {
       Position<Bond> newPosition = Position<Bond>(trade.GetProduct());
@@ -43,10 +48,10 @@ class BondTradesServiceListener : public ServiceListener<Trade<Bond>> {
   }
 
   void ProcessRemove(Trade<Bond> &data) override {
-
+    // NO-OP : Trades are never removed in this project.
   }
   void ProcessUpdate(Trade<Bond> &data) override {
-
+    // NO-OP : Trades are never updated in this project.
   }
 
  private:

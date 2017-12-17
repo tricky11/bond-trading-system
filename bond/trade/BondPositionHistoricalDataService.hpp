@@ -10,6 +10,9 @@
 #include "../../connectors/OutputFileConnector.hpp"
 #include "../../base/positionservice.hpp"
 
+/**
+ * Listens to updates in positions from BondPositionService.
+ */
 class BondPositionServiceListener : public ServiceListener<Position<Bond>> {
  public:
   explicit BondPositionServiceListener(HistoricalDataService<Position<Bond>> *listeningService);
@@ -20,6 +23,9 @@ class BondPositionServiceListener : public ServiceListener<Position<Bond>> {
   void ProcessAdd(Position<Bond> &data) override;
 };
 
+/**
+ * Writes output to positions.csv
+ */
 class BondPositionConnector : public OutputFileConnector<Position<Bond>> {
  public:
   explicit BondPositionConnector(const string &filePath);

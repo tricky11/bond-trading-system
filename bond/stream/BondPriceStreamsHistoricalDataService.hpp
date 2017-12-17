@@ -10,14 +10,18 @@
 #include "../../connectors/OutputFileConnector.hpp"
 #include "../../base/streamingservice.hpp"
 
+/**
+ * Listens to price stream updats from StreamingService
+ * and writes them to output file streaming.csv
+ */
 class BondPriceStreamsServiceListener : public ServiceListener<PriceStream<Bond>> {
  public:
   explicit BondPriceStreamsServiceListener(HistoricalDataService<PriceStream<Bond>> *listeningService);
   void ProcessRemove(PriceStream<Bond> &data) override;
   void ProcessUpdate(PriceStream<Bond> &data) override;
+  void ProcessAdd(PriceStream<Bond> &data) override;
  private:
   HistoricalDataService<PriceStream<Bond>> *listeningService;
-  void ProcessAdd(PriceStream<Bond> &data) override;
 };
 
 class BondPriceStreamsConnector : public OutputFileConnector<PriceStream<Bond>> {

@@ -12,6 +12,9 @@
 #include "../../connectors/InputFileConnector.hpp"
 #include "../../utils/string.h"
 
+/**
+ * Reads data from trades.csv
+ */
 class BondTradesConnector : public InputFileConnector<string, Trade<Bond>> {
  public:
   BondTradesConnector(const string &filePath, Service<string, Trade<Bond>> *connectedService);
@@ -19,6 +22,9 @@ class BondTradesConnector : public InputFileConnector<string, Trade<Bond>> {
   void parse(string line) override;
 };
 
+/**
+ * Processes trades.
+ */
 class BondTradeBookingService : public TradeBookingService<Bond> {
  public:
   BondTradeBookingService() {}
@@ -41,6 +47,10 @@ void BondTradesConnector::parse(string line) {
 BondTradesConnector::BondTradesConnector(const string &filePath, Service<string, Trade<Bond>> *connectedService)
     : InputFileConnector(filePath, connectedService) {}
 
+/**
+ * Store the new trade data.
+ * @param data
+ */
 void BondTradeBookingService::OnMessage(Trade<Bond> &data) {
   // TODO: Check if trade has already been processed (Not part of project, since we never generate duplicate trades)
   dataStore.insert(make_pair(data.GetTradeId(), data));
@@ -51,6 +61,10 @@ void BondTradeBookingService::Subscribe(BondTradesConnector *connector) {
   connector->read();
 }
 
+/**
+ * Notify all listeners of the new trade.
+ * @param trade
+ */
 void BondTradeBookingService::BookTrade(const Trade<Bond> &trade) {
   for (auto listener : this->GetListeners()) {
     listener->ProcessAdd(const_cast<Trade<Bond> &>(trade));
@@ -69,6 +83,8 @@ class BondExecutionServiceListener : public ServiceListener<ExecutionOrder<Bond>
  public:
   BondExecutionServiceListener(BondTradeBookingService *listeningService) : listeningService(listeningService) {}
   void ProcessAdd(ExecutionOrder<Bond> &data) override {
+
+    // This is called by the ExecutionService after deciding to execute a trade.
     // TODO: Generate tradeId here
     Trade<Bond> trade(data.GetProduct(),
                       "tradeid",
@@ -80,11 +96,11 @@ class BondExecutionServiceListener : public ServiceListener<ExecutionOrder<Bond>
   }
 
   void ProcessRemove(ExecutionOrder<Bond> &data) override {
-
+    // NO-OP : ExecutionOrders are never removed in this project.
   }
 
   void ProcessUpdate(ExecutionOrder<Bond> &data) override {
-
+    // NO-OP : ExecutionOrders are never updated in this project.
   }
 };
 

@@ -10,6 +10,10 @@
 #include "../../connectors/OutputFileConnector.hpp"
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+/**
+ * This is the interface to display prices to any GUI.
+ * Writes data to gui.csv
+ */
 class GUIConnector : public OutputFileConnector<Price<Bond>> {
  public:
   GUIConnector(const string &filePath);
@@ -56,6 +60,7 @@ GUIConnector::GUIConnector(const string &filePath) : OutputFileConnector(filePat
 
 string GUIConnector::toCSVString(Price<Bond> &data) {
   std::ostringstream oss;
+  // Calculate bid and offer prices from mid and spread.
   oss << data.GetProduct().GetProductId() << "," <<
       (data.GetMid() - data.GetBidOfferSpread() / 2) << "," <<
       (data.GetMid() + data.GetBidOfferSpread() / 2);
@@ -65,6 +70,11 @@ string GUIConnector::getCSVHeader() {
   return "CUSIP,BidPrice,OfferPrice";
 }
 
+/**
+ * Store data only once every 300ms. Any updates within that interval are discarded.
+ *
+ * @param data
+ */
 void GUIService::PersistData(Price<Bond> &data) {
   auto currentTick = boost::posix_time::microsec_clock::universal_time();
   boost::posix_time::time_duration diff = currentTick - lastTick;

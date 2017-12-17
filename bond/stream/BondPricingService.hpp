@@ -12,6 +12,9 @@
 #include "../../utils/string.h"
 #include "../BondProductService.hpp"
 
+/**
+ * Reads data from prices.csv
+ */
 class BondPricesConnector : public InputFileConnector<string, Price<Bond>> {
  public:
   BondPricesConnector(const string &filePath, Service<string, Price<Bond>> *connectedService);
@@ -19,6 +22,9 @@ class BondPricesConnector : public InputFileConnector<string, Price<Bond>> {
   void parse(string line) override;
 };
 
+/**
+ * Processes prices.csv
+ */
 class BondPricingService : public PricingService<Bond> {
  public:
   BondPricingService() {}
@@ -39,6 +45,11 @@ void BondPricesConnector::parse(string line) {
 BondPricesConnector::BondPricesConnector(const string &filePath, Service<string, Price<Bond>> *connectedService)
     : InputFileConnector(filePath, connectedService) {}
 
+/**
+ * Store the new price and update all listeners.
+ *
+ * @param data
+ */
 void BondPricingService::OnMessage(Price<Bond> &data) {
   if (dataStore.find(data.GetProduct().GetProductId()) == dataStore.end()) {
     dataStore.insert(make_pair(data.GetProduct().GetProductId(), data));
@@ -47,7 +58,6 @@ void BondPricingService::OnMessage(Price<Bond> &data) {
     }
   } else {
     dataStore.insert(make_pair(data.GetProduct().GetProductId(), data));
-    dataStore.insert({data.GetProduct().GetProductId(), data});
     for (auto listener : this->GetListeners()) {
       listener->ProcessUpdate(data);
     }

@@ -17,6 +17,10 @@ class BondStreamingService : public StreamingService<Bond> {
     // Do nothing. Since this service does not have a connector.
   }
 
+  /**
+   * Publishes a price stream to all listeners.
+   * @param priceStream
+   */
   void PublishPrice(const PriceStream<Bond> &priceStream) override {
     dataStore.insert(make_pair(priceStream.GetProduct().GetProductId(), priceStream));
     if (dataStore.find(priceStream.GetProduct().GetProductId()) == dataStore.end()) {

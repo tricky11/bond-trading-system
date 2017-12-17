@@ -11,6 +11,9 @@
 #include "../../base/streamingservice.hpp"
 #include "../../base/executionservice.hpp"
 
+/**
+ * Writes all ExecutionOrder to executions.csv
+ */
 class BondExecutionOrderServiceListener : public ServiceListener<ExecutionOrder<Bond>> {
  public:
   explicit BondExecutionOrderServiceListener(HistoricalDataService<ExecutionOrder<Bond>> *listeningService);

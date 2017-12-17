@@ -16,6 +16,8 @@ class BondExecutionService : public ExecutionService<Bond> {
   void OnMessage(ExecutionOrder<Bond> &data) override {
     // Do nothing. Since streaming service does not have a connector.
   }
+
+  // Execute an order and notify listeners.
   void ExecuteOrder(const ExecutionOrder<Bond> &order, Market market) override {
     for (auto listener:this->GetListeners()) {
       listener->ProcessAdd(const_cast<ExecutionOrder<Bond> &>(order));
@@ -28,6 +30,7 @@ class BondAlgoExecutionServiceListener : public ServiceListener<AlgoExecution<Bo
   explicit BondAlgoExecutionServiceListener(BondExecutionService *listeningService)
       : listeningService(listeningService) {}
 
+  // Execute a given order on the CME market by default.
   void ProcessAdd(AlgoExecution<Bond> &data) override {
     listeningService->ExecuteOrder(data.getExecutionOrder(), Market::CME);
   }

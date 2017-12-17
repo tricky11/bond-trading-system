@@ -9,7 +9,15 @@
 #include <fstream>
 #include <iostream>
 #include "../base/soa.hpp"
-
+/**
+ * This connector writes data to output files.
+ * Implementing classes have to implement a method to convert the object into string form,
+ * as well as an optional header method.
+ * If a file already exists, its contents are truncated.
+ * If a file does not exist, a new one is created.
+ *
+ * @tparam V Type of the data that is being written.
+ */
 template<typename V>
 class OutputFileConnector : public Connector<V> {
  private:

@@ -9,6 +9,14 @@
 #include <fstream>
 #include <iostream>
 #include "../base/soa.hpp"
+
+/**
+ * This class is used to read data from files into services. Implementing classes should override the parse method.
+ * Once the read method is called, it calls parse for each line of the input.
+ *
+ * @tparam K Key type of the connected service.
+ * @tparam V Value type of the connected service.
+ */
 template<typename K, typename V>
 class InputFileConnector : public Connector<V> {
  private:

@@ -10,6 +10,9 @@
 #include "../../connectors/OutputFileConnector.hpp"
 #include "../../base/riskservice.hpp"
 
+/**
+ * Listens to updates from BondRiskService.
+ */
 class BondRiskServiceListener : public ServiceListener<PV01<Bond>> {
  public:
   explicit BondRiskServiceListener(HistoricalDataService<PV01<Bond>> *listeningService);
@@ -20,6 +23,9 @@ class BondRiskServiceListener : public ServiceListener<PV01<Bond>> {
   void ProcessAdd(PV01<Bond> &data) override;
 };
 
+/**
+ * Writes output to risk.csv
+ */
 class BondRiskConnector : public OutputFileConnector<PV01<Bond>> {
  public:
   explicit BondRiskConnector(const string &filePath);
