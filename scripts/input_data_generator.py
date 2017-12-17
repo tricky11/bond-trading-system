@@ -14,20 +14,24 @@ def main():
     parser.add_argument('--prices', help='Generate only prices data.', action='store_true')
     parser.add_argument('--inquiries', help='Generate only inquiries data.', action='store_true')
     parser.add_argument('--marketdata', help='Generate only market(orderbook) data.', action='store_true')
+    parser.add_argument('--orderbook_updates', metavar='M', help='Number of orderbook updates to generate.',
+                        default=1000000, type=int, nargs='?')
+    parser.add_argument('--price_updates', metavar='P', help='Number of price updates to generate.',
+                        default=1000000, type=int, nargs='?')
     args = parser.parse_args()
     if args.trades:
         generate_trades()
     elif args.inquiries:
         generate_inquiries()
     elif args.prices:
-        generate_prices()
+        generate_prices(args.price_updates)
     elif args.marketdata:
-        generate_marketdata()
+        generate_marketdata(args.orderbook_updates)
     else:
         generate_trades()
         generate_inquiries()
-        generate_prices()
-        generate_marketdata()
+        generate_prices(args.price_updates)
+        generate_marketdata(args.orderbook_updates)
 
 
 def generate_trades():
@@ -82,17 +86,17 @@ def generate_inquiries():
     print("Generated inquiries.csv")
 
 
-def generate_prices():
+def generate_prices(num_rows):
     input_file = open("../input/prices.csv", "w")
     data = "ProductId,Mid,Spread\n"
     print "Buffering prices data.\n" \
           "WARNING: This takes a long time. Do not stop this process in between.\n" \
           "Nothing will be written to file until it completes."
     for i, product_id in enumerate(product_ids):
-        for j in xrange(1000000):
-            if j % 100000 == 0:
+        for j in xrange(num_rows):
+            if j % (num_rows/10) == 0:
                 print("prices.csv in progress: {0:.2f}%".format(
-                    100.0 * (1000000 * i + j) / (len(product_ids) * 1000000)))
+                    100.0 * (num_rows * i + j) / (len(product_ids) * num_rows)))
             data += (product_id + "," +
                      get_random_fractional_price(99, 101) + "," +
                      get_random_spread() + "\n")
@@ -102,7 +106,7 @@ def generate_prices():
     print("Generated prices.csv")
 
 
-def generate_marketdata():
+def generate_marketdata(num_rows):
     volumes = [10000000, 20000000, 30000000, 40000000, 50000000]
     volume_state = 0
 
@@ -117,10 +121,10 @@ def generate_marketdata():
           "Nothing will be written to file until it completes."
 
     for i, product_id in enumerate(product_ids):
-        for j in range(1000000):
-            if j % 100000 == 0:
+        for j in range(num_rows):
+            if j % (num_rows/10) == 0:
                 print("marketdata.csv in progress: {0:.2f}%".format(
-                    100.0 * (1000000 * i + j) / (len(product_ids) * 1000000)))
+                    100.0 * (num_rows * i + j) / (len(product_ids) * num_rows)))
             data += (product_id)
             mid = random.randint(99 * 256, 101 * 256)  # value multiplied by 256
             for k in range(5):
