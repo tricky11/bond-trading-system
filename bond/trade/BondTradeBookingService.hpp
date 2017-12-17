@@ -74,7 +74,7 @@ void BondTradeBookingService::BookTrade(const Trade<Bond> &trade) {
 class BondExecutionServiceListener : public ServiceListener<ExecutionOrder<Bond>> {
  private:
   BondTradeBookingService *listeningService;
-  std::array<string, 3> states = {"TRSY1", "TRSY2", "TRSY3"};
+  std::array<string, 3> states = {{"TRSY1", "TRSY2", "TRSY3"}};
   unsigned int currentState = 0;
   void cycleState() {
     currentState = (currentState + 1) % states.size();

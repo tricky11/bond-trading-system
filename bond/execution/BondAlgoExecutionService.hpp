@@ -71,7 +71,7 @@ class BondAlgoExecutionService : public Service<string, AlgoExecution<Bond>> {
   }
 
  private:
-  std::array<PricingSide, 2> states = {PricingSide::BID, PricingSide::OFFER};
+  std::array<PricingSide, 2> states = {{PricingSide::BID, PricingSide::OFFER}};
   unsigned int currentState = 0;
   void cycleState() {
     currentState = (currentState + 1) % states.size();

@@ -8,7 +8,7 @@ ServiceListeners are used to pass data between services. Connectors are used for
 * By default, it generates all datasets and full size (WARNING: Takes too long to run!)
 
 ## Prerequisites
-* Boost (uses dates for maturities)
+* Boost 1.58.0 (uses dates for maturities), CMake 3.8 for building
 * Input is expected to be in the input directory (default for above script)
 * Application needs to have write access to directory 'output' inside the root of the project
 
