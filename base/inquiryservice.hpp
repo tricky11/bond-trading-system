@@ -45,6 +45,7 @@ class Inquiry {
 
   // Update the state of the inquiry
   void SetState(InquiryState state);
+  void SetPrice(double price);
 
  private:
   string inquiryId;
@@ -67,7 +68,7 @@ class InquiryService : public Service<string, Inquiry<T> > {
  public:
 
   // Send a quote back to the client
-  void SendQuote(const string &inquiryId, double price);
+  virtual void SendQuote(const string &inquiryId, double price)=0;
 
   // Reject an inquiry from the client
   void RejectInquiry(const string &inquiryId);
@@ -122,5 +123,10 @@ InquiryState Inquiry<T>::GetState() const {
 template<typename T>
 void Inquiry<T>::SetState(InquiryState state) {
   Inquiry::state = state;
+}
+
+template<typename T>
+void Inquiry<T>::SetPrice(double price) {
+  Inquiry::price = price;
 }
 #endif

@@ -25,6 +25,7 @@ class AlgoStream {
 
 class BondAlgoStreamingService : public Service<string, AlgoStream<Bond>> {
  public:
+  BondAlgoStreamingService() {}
   void PublishPrice(Price<Bond> &newPrice) {
     auto bond = BondProductService::GetInstance()->GetData(newPrice.GetProduct().GetProductId());
 

@@ -11,6 +11,7 @@
 
 class BondPositionService : public PositionService<Bond> {
  public:
+  BondPositionService() {}
   void AddTrade(const Trade<Bond> &trade) override {
     if (dataStore.find(trade.GetProduct().GetProductId()) == dataStore.end()) {
       Position<Bond> newPosition = Position<Bond>(trade.GetProduct());

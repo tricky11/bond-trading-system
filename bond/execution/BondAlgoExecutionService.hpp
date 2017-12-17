@@ -25,12 +25,29 @@ class AlgoExecution {
 
 class BondAlgoExecutionService : public Service<string, AlgoExecution<Bond>> {
  public:
+  BondAlgoExecutionService() {}
   void ProcessOrderBook(OrderBook<Bond> &orderBook) {
-    double spread = orderBook.GetOfferStack()[0].GetPrice() - orderBook.GetBidStack()[0].GetPrice();
-    if (spread <= 1 / 128) {
-      // TODO: Generate orderId here
-      ExecutionOrder<Bond> executionOrder
-          (orderBook.GetProduct(), states[currentState], "orderid", MARKET, 0.0, 0, 0, "dummy", false);
+    auto topBid = orderBook.GetBidStack()[0];
+    auto topOffer = orderBook.GetOfferStack()[0];
+    double spread = topOffer.GetPrice() - topBid.GetPrice();
+    if (spread <= 1.0 / 128) {
+
+      long volume = states[currentState] == BID ? topBid.GetQuantity()
+                                                : topOffer.GetQuantity();
+      double price = states[currentState] == BID ? topBid.GetPrice()
+                                                 : topOffer.GetPrice();
+
+      ExecutionOrder<Bond>
+          executionOrder
+          (orderBook.GetProduct(),
+           states[currentState],
+           "Order_" + to_string(orderNumber),
+           MARKET,
+           price,
+           volume,
+           0,
+           "",
+           false);
       AlgoExecution<Bond> algoExecution(executionOrder);
       for (auto listener : this->GetListeners()) {
         listener->ProcessAdd(algoExecution);
@@ -48,7 +65,9 @@ class BondAlgoExecutionService : public Service<string, AlgoExecution<Bond>> {
   unsigned int currentState = 0;
   void cycleState() {
     currentState = (currentState + 1) % states.size();
+    orderNumber++;
   }
+  unsigned long int orderNumber = 1;
 };
 
 class BondMarketDataServiceListener : public ServiceListener<OrderBook<Bond>> {

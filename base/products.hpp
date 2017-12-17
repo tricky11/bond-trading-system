@@ -49,7 +49,12 @@ class Bond : public Product {
  public:
 
   // ctor for a bond
-  Bond(string _productId, BondIdType _bondIdType, string _ticker, float _coupon, date _maturityDate);
+  Bond(string _productId,
+       BondIdType _bondIdType,
+       string _ticker,
+       float _coupon,
+       date _maturityDate,
+       double pv01);
   Bond();
 
   // Get the ticker
@@ -64,6 +69,7 @@ class Bond : public Product {
   // Get the bond identifier type
   BondIdType GetBondIdType() const;
 
+  double GetPV01() const;
   // Print the bond
   friend ostream &operator<<(ostream &output, const Bond &bond);
 
@@ -72,6 +78,7 @@ class Bond : public Product {
   string ticker;
   float coupon;
   date maturityDate;
+  double pv01;
 
 };
 
@@ -179,13 +186,19 @@ ProductType Product::GetProductType() const {
   return productType;
 }
 
-Bond::Bond(string _productId, BondIdType _bondIdType, string _ticker, float _coupon, date _maturityDate) : Product(
+Bond::Bond(string _productId,
+           BondIdType _bondIdType,
+           string _ticker,
+           float _coupon,
+           date _maturityDate,
+           double _pv01) : Product(
     _productId,
     BOND) {
   bondIdType = _bondIdType;
   ticker = _ticker;
   coupon = _coupon;
   maturityDate = _maturityDate;
+  pv01 = _pv01;
 }
 
 Bond::Bond() : Product(0, BOND) {
@@ -205,6 +218,10 @@ const date &Bond::GetMaturityDate() const {
 
 BondIdType Bond::GetBondIdType() const {
   return bondIdType;
+}
+
+double Bond::GetPV01() const {
+  return pv01;
 }
 
 ostream &operator<<(ostream &output, const Bond &bond) {

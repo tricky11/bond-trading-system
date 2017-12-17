@@ -21,6 +21,7 @@ class BondTradesConnector : public InputFileConnector<string, Trade<Bond>> {
 
 class BondTradeBookingService : public TradeBookingService<Bond> {
  public:
+  BondTradeBookingService() {}
   void Subscribe(BondTradesConnector *connector);
   void OnMessage(Trade<Bond> &data) override;
   void BookTrade(const Trade<Bond> &trade) override;

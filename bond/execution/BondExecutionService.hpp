@@ -12,6 +12,7 @@
 
 class BondExecutionService : public ExecutionService<Bond> {
  public:
+  BondExecutionService() {}
   void OnMessage(ExecutionOrder<Bond> &data) override {
     // Do nothing. Since streaming service does not have a connector.
   }

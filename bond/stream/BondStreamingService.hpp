@@ -12,6 +12,7 @@
 
 class BondStreamingService : public StreamingService<Bond> {
  public:
+  BondStreamingService() {}
   void OnMessage(PriceStream<Bond> &data) override {
     // Do nothing. Since this service does not have a connector.
   }

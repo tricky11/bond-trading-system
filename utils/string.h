@@ -19,4 +19,16 @@ vector<string> splitString(string input, char delimiter) {
   }
   return result;
 }
+
+double convertFractionalPriceToDouble(string price) {
+  auto split = splitString(price, '-');
+  if (split.size() != 2) {
+    //invalid input
+    return 0.0;
+  }
+  double integerPart = stod(split[0]);
+  double firstFractionalPart = stod(split[1].substr(0,2)) / 32.0;
+  double secondFractionalPart = ((split[1][2] == '+') ? 4 : (split[1][2] - '0')) / 256.0;
+  return integerPart + firstFractionalPart + secondFractionalPart;
+}
 #endif //BONDTRADINGSYSTEM_STRING_H

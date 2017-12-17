@@ -154,7 +154,7 @@ def get_random_fractional_price(low, high):
 
 
 def get_random_spread():
-    return "00-" + "23+"[random.randint(0, 2)]
+    return "0-00" + "23+"[random.randint(0, 2)]
 
 
 def get_fractional_representation(increment_number):

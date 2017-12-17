@@ -57,17 +57,23 @@ class BondInquiryService : public InquiryService<Bond> {
   }
 
   void OnMessage(Inquiry<Bond> &data) override {
-    dataStore.insert(make_pair(data.GetProduct().GetProductId(), data));
+    dataStore.insert(make_pair(data.GetInquiryId(), data));
     if (data.GetState() == InquiryState::RECEIVED) {
-      for (auto listener : this->GetListeners()) {
-        listener->ProcessAdd(data);
-      }
+      SendQuote(data.GetInquiryId(), 100.0);
     } else if (data.GetState() == InquiryState::QUOTED) {
       data.SetState(InquiryState::DONE);
       publishConnector->Publish(data);
       for (auto listener : this->GetListeners()) {
         listener->ProcessUpdate(data);
       }
+    }
+  }
+
+  void SendQuote(const string &inquiryId, double price) override {
+    auto data = dataStore.at(inquiryId);
+    data.SetPrice(price);
+    for (auto listener : this->GetListeners()) {
+      listener->ProcessAdd(data);
     }
   }
 

@@ -20,6 +20,7 @@ class BondMarketDataConnector : public InputFileConnector<string, OrderBook<Bond
 
 class BondMarketDataService : public MarketDataService<Bond> {
  public:
+  BondMarketDataService() {}
   const BidOffer &GetBestBidOffer(const string &productId) override;
   const OrderBook<Bond> &AggregateDepth(const string &productId) override;
   void Subscribe(BondMarketDataConnector *connector);
@@ -33,8 +34,8 @@ void BondMarketDataConnector::parse(string line) {
   vector<Order> bidStack;
   vector<Order> offerStack;
   for (int i = 1; i <= 5; ++i) {
-    Order bid(stod(split[2 * i - 1]), stol(split[2 * i]), PricingSide::BID);
-    Order offer(stod(split[9 + 2 * i]), stol(split[10 + 2 * i]), PricingSide::OFFER);
+    Order bid(convertFractionalPriceToDouble(split[2 * i - 1]), stol(split[2 * i]), PricingSide::BID);
+    Order offer(convertFractionalPriceToDouble(split[9 + 2 * i]), stol(split[10 + 2 * i]), PricingSide::OFFER);
     bidStack.push_back(bid);
     offerStack.push_back(offer);
   }

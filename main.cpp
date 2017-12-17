@@ -13,7 +13,6 @@
 #include "bond/execution/BondAlgoExecutionService.hpp"
 #include "bond/execution/BondExecutionService.hpp"
 #include "bond/execution/BondExecutionHistoricalDataService.h"
-#include "bond/BondProductService.hpp"
 
 void setupProducts();
 void runStreamingFlow();
@@ -22,19 +21,20 @@ void runTradesAndExecutionFlow();
 
 int main() {
   setupProducts();
-  runStreamingFlow();
+//  runStreamingFlow();
 //  runInquiryFlow();
-//  runTradesAndExecutionFlow();
+  runTradesAndExecutionFlow();
 }
 
 void setupProducts() {
   auto productService = BondProductService::GetInstance();
-  Bond T2("9128283H1", CUSIP, "T", 1.750, date(2019, Nov, 30));
-  Bond T3("9128283L2", CUSIP, "T", 1.875, date(2020, Dec, 15));
-  Bond T5("912828M80", CUSIP, "T", 2.0, date(2022, Nov, 30));
-  Bond T7("9128283J7", CUSIP, "T", 2.125, date(2024, Nov, 30));
-  Bond T10("9128283F5", CUSIP, "T", 2.25, date(2027, Dec, 15));
-  Bond T30("912810RZ3", CUSIP, "T", 2.75, date(2047, Dec, 15));
+
+  Bond T2("9128283H1", CUSIP, "T", 1.750, date(2019, Nov, 30), 0.019851);
+  Bond T3("9128283L2", CUSIP, "T", 1.875, date(2020, Dec, 15), 0.029309);
+  Bond T5("912828M80", CUSIP, "T", 2.0, date(2022, Nov, 30), 0.048643);
+  Bond T7("9128283J7", CUSIP, "T", 2.125, date(2024, Nov, 30), 0.065843);
+  Bond T10("9128283F5", CUSIP, "T", 2.25, date(2027, Dec, 15), 0.087939);
+  Bond T30("912810RZ3", CUSIP, "T", 2.75, date(2047, Dec, 15), 0.184698);
 
   productService->Add(T2);
   productService->Add(T3);
@@ -76,7 +76,10 @@ void runTradesAndExecutionFlow() {
   executionService->AddListener(executionListener);
   executionService->AddListener(executionListenerFromTrade);
 
+  std::cout << "Processing trades.csv" << std::endl;
   tradeBookingService->Subscribe(new BondTradesConnector("input/trades.csv", tradeBookingService));
+
+  std::cout << "Processing marketdata.csv" << std::endl;
   marketDataService->Subscribe(new BondMarketDataConnector("input/marketdata.csv", marketDataService));
 }
 
@@ -84,6 +87,8 @@ void runInquiryFlow() {
   auto inquiryService = new BondInquiryService();
   auto inquiryServiceListener = new BondInquiryServiceListener(inquiryService);
   inquiryService->AddListener(inquiryServiceListener);
+
+  std::cout << "Processing inquiries.csv" << std::endl;
   inquiryService->Subscribe(new BondInquirySubscriber("input/inquiries.csv", inquiryService));
 }
 
@@ -104,6 +109,7 @@ void runStreamingFlow() {
   algoStreamingService->AddListener(streamingServiceListener);
   streamingService->AddListener(historicalDataServiceListener);
 
+  std::cout << "Processing prices.csv" << std::endl;
   pricingService->Subscribe(
       new BondPricesConnector("input/prices.csv", pricingService));
 }

@@ -21,6 +21,7 @@ class BondPricesConnector : public InputFileConnector<string, Price<Bond>> {
 
 class BondPricingService : public PricingService<Bond> {
  public:
+  BondPricingService() {}
   void Subscribe(BondPricesConnector *connector);
   void OnMessage(Price<Bond> &data) override;
 };
@@ -28,7 +29,7 @@ class BondPricingService : public PricingService<Bond> {
 void BondPricesConnector::parse(string line) {
   auto split = splitString(line, ',');
   string id = split[0];
-  double mid = stod(split[1]), bidOfferSpread = stod(split[2]);
+  double mid = convertFractionalPriceToDouble(split[1]), bidOfferSpread = convertFractionalPriceToDouble(split[2]);
 
   auto bond = BondProductService::GetInstance()->GetData(id);
   auto price = Price<Bond>(bond, mid, bidOfferSpread);

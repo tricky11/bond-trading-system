@@ -12,13 +12,15 @@
 
 class BondRiskService : public RiskService<Bond> {
  public:
+  BondRiskService() {}
   void OnMessage(PV01<Bond> &data) override {
     // Do nothing. Since streaming service does not have a connector.
   }
 
   void AddPosition(Position<Bond> &position) override {
     auto product = position.GetProduct();
-    PV01<Bond> risk(product, position.GetAggregatePosition(), position.GetAggregatePosition());
+    // source of PV01 values : https://eiptrading.com/risk-management/
+    PV01<Bond> risk(product, position.GetAggregatePosition() * product.GetPV01(), position.GetAggregatePosition());
     if (dataStore.find(position.GetProduct().GetProductId()) == dataStore.end()) {
       dataStore.insert(make_pair(position.GetProduct().GetProductId(), risk));
       for (auto listener:this->GetListeners()) {
