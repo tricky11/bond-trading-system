@@ -48,7 +48,7 @@ class BucketedSector {
 
  public:
   // ctor for a bucket sector
-  BucketedSector(const vector<T> &_products, string _name);
+  explicit BucketedSector(const vector<T> &_products, string _name);
 
   // Get the products associated with this bucket
   const vector<T> &GetProducts() const;
@@ -85,6 +85,19 @@ PV01<T>::PV01(const T &_product, double _pv01, long _quantity) :
     product(_product) {
   pv01 = _pv01;
   quantity = _quantity;
+}
+
+template<typename T>
+const T &PV01<T>::GetProduct() const {
+  return product;
+}
+template<typename T>
+double PV01<T>::GetPV01() const {
+  return pv01;
+}
+template<typename T>
+long PV01<T>::GetQuantity() const {
+  return quantity;
 }
 
 template<typename T>

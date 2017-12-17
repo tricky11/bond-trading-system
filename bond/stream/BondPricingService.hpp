@@ -16,7 +16,7 @@ class BondPricesConnector : public InputFileConnector<string, Price<Bond>> {
  public:
   BondPricesConnector(const string &filePath, Service<string, Price<Bond>> *connectedService);
  private:
-  Price<Bond> parse(string line) override;
+  void parse(string line) override;
 };
 
 class BondPricingService : public PricingService<Bond> {
@@ -25,13 +25,14 @@ class BondPricingService : public PricingService<Bond> {
   void OnMessage(Price<Bond> &data) override;
 };
 
-Price<Bond> BondPricesConnector::parse(string line) {
+void BondPricesConnector::parse(string line) {
   auto split = splitString(line, ',');
   string id = split[0];
   double mid = stod(split[1]), bidOfferSpread = stod(split[2]);
 
   auto bond = BondProductService::GetInstance()->GetData(id);
-  return Price<Bond>(bond, mid, bidOfferSpread);
+  auto price = Price<Bond>(bond, mid, bidOfferSpread);
+  connectedService->OnMessage(price);
 }
 
 BondPricesConnector::BondPricesConnector(const string &filePath, Service<string, Price<Bond>> *connectedService)
@@ -39,12 +40,13 @@ BondPricesConnector::BondPricesConnector(const string &filePath, Service<string,
 
 void BondPricingService::OnMessage(Price<Bond> &data) {
   if (dataStore.find(data.GetProduct().GetProductId()) == dataStore.end()) {
-    dataStore.insert(make_pair(data.GetProduct().GetProductId(),data));
+    dataStore.insert(make_pair(data.GetProduct().GetProductId(), data));
     for (auto listener : this->GetListeners()) {
       listener->ProcessAdd(data);
     }
   } else {
-    dataStore.insert(make_pair(data.GetProduct().GetProductId(),data));
+    dataStore.insert(make_pair(data.GetProduct().GetProductId(), data));
+    dataStore.insert({data.GetProduct().GetProductId(), data});
     for (auto listener : this->GetListeners()) {
       listener->ProcessUpdate(data);
     }

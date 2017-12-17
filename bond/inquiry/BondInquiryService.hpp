@@ -17,7 +17,7 @@ class BondInquirySubscriber : public InputFileConnector<string, Inquiry<Bond>> {
       connectedService) {}
 
  private:
-  Inquiry<Bond> parse(string line) override {
+  void parse(string line) override {
     auto split = splitString(line, ',');
     string inquiryId = split[0];
     string productId = split[1];
@@ -25,7 +25,8 @@ class BondInquirySubscriber : public InputFileConnector<string, Inquiry<Bond>> {
     long quantity = stol(split[3]);
     double price = stol(split[4]);
     auto bond = BondProductService::GetInstance()->GetData(productId);
-    return Inquiry<Bond>(inquiryId, bond, side, quantity, price, InquiryState::RECEIVED);
+    auto inquiry = Inquiry<Bond>(inquiryId, bond, side, quantity, price, InquiryState::RECEIVED);
+    connectedService->OnMessage(inquiry);
   }
 };
 

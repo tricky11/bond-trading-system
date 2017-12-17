@@ -16,7 +16,7 @@ class BondTradesConnector : public InputFileConnector<string, Trade<Bond>> {
  public:
   BondTradesConnector(const string &filePath, Service<string, Trade<Bond>> *connectedService);
  private:
-  Trade<Bond> parse(string line) override;
+  void parse(string line) override;
 };
 
 class BondTradeBookingService : public TradeBookingService<Bond> {
@@ -26,7 +26,7 @@ class BondTradeBookingService : public TradeBookingService<Bond> {
   void BookTrade(const Trade<Bond> &trade) override;
 };
 
-Trade<Bond> BondTradesConnector::parse(string line) {
+void BondTradesConnector::parse(string line) {
   auto split = splitString(line, ',');
   string productId = split[0], tradeId = split[1], bookId = split[3];
   double price = stod(split[2]);
@@ -34,7 +34,8 @@ Trade<Bond> BondTradesConnector::parse(string line) {
   Side side = split[5].compare("0") == 0 ? Side::BUY : Side::SELL;
 
   auto bond = BondProductService::GetInstance()->GetData(productId);
-  return Trade<Bond>(bond, tradeId, price, bookId, quantity, side);
+  auto trade = Trade<Bond>(bond, tradeId, price, bookId, quantity, side);
+  connectedService->OnMessage(trade);
 }
 BondTradesConnector::BondTradesConnector(const string &filePath, Service<string, Trade<Bond>> *connectedService)
     : InputFileConnector(filePath, connectedService) {}

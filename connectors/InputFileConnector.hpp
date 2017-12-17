@@ -13,10 +13,12 @@ template<typename K, typename V>
 class InputFileConnector : public Connector<V> {
  private:
   string filePath;
+
+ protected:
   Service<K, V> *connectedService;
 
  public:
-  virtual V parse(string line) = 0;
+  virtual void parse(string line) = 0;
 
   void Publish(V &data) override {
     //do nothing since this is a subscribe only connector.
@@ -33,8 +35,7 @@ class InputFileConnector : public Connector<V> {
     inFile >> line; // skip headers
 
     while (inFile >> line) {
-      auto data = parse(line);
-      connectedService->OnMessage(data);
+      parse(line);
     }
     inFile.close();
   }

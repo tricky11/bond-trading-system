@@ -15,7 +15,7 @@ class BondMarketDataConnector : public InputFileConnector<string, OrderBook<Bond
  public:
   BondMarketDataConnector(const string &filePath, Service<string, OrderBook<Bond>> *connectedService);
  private:
-  OrderBook<Bond> parse(string line) override;
+  void parse(string line) override;
 };
 
 class BondMarketDataService : public MarketDataService<Bond> {
@@ -26,7 +26,7 @@ class BondMarketDataService : public MarketDataService<Bond> {
   void OnMessage(OrderBook<Bond> &data) override;
 };
 
-OrderBook<Bond> BondMarketDataConnector::parse(string line) {
+void BondMarketDataConnector::parse(string line) {
   auto split = splitString(line, ',');
   string id = split[0];
   auto bond = BondProductService::GetInstance()->GetData(id);
@@ -38,7 +38,8 @@ OrderBook<Bond> BondMarketDataConnector::parse(string line) {
     bidStack.push_back(bid);
     offerStack.push_back(offer);
   }
-  return OrderBook<Bond>(bond, bidStack, offerStack);
+  auto book = OrderBook<Bond>(bond, bidStack, offerStack);
+  connectedService->OnMessage(book);
 }
 
 BondMarketDataConnector::BondMarketDataConnector(const string &filePath,

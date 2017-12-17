@@ -68,7 +68,6 @@ class Bond : public Product {
   friend ostream &operator<<(ostream &output, const Bond &bond);
 
  private:
-  string productId;
   BondIdType bondIdType;
   string ticker;
   float coupon;

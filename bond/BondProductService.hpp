@@ -14,7 +14,6 @@
 #include "../base/products.hpp"
 #include "../base/soa.hpp"
 
-
 /**
  * Bond Product Service to own reference data over a set of bond securities.
  * Key is the productId string, value is a Bond.
@@ -35,7 +34,7 @@ class BondProductService : public Service<string, Bond> {
   void OnMessage(Bond &data) override;
 
  private:
-  map<string, Bond> bondMap; // cache of bond products
+  unordered_map<string, Bond> bondMap; // cache of bond products
   static BondProductService *instance; // reference to singleton instance
 
   // Private ctor to disallow direct initialization.
@@ -43,7 +42,7 @@ class BondProductService : public Service<string, Bond> {
 };
 
 BondProductService::BondProductService() {
-  bondMap = map<string, Bond>();
+  bondMap = unordered_map<string, Bond>();
 }
 
 void BondProductService::OnMessage(Bond &data) {
@@ -55,7 +54,7 @@ Bond &BondProductService::GetData(string productId) {
 }
 
 void BondProductService::Add(Bond &bond) {
-  bondMap.insert(pair<string, Bond>(bond.GetProductId(), bond));
+  bondMap.insert(make_pair(bond.GetProductId(), bond));
 }
 
 /**
