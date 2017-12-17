@@ -60,7 +60,7 @@ class BondAlgoStreamingService : public Service<string, AlgoStream<Bond>> {
   }
 
  private:
-  std::array<int, 2> states = {1000000, 2000000};
+  std::array<int, 2> states = {{1000000, 2000000}};
   unsigned int currentState = 0;
   void cycleState() {
     currentState = (currentState + 1) % states.size();

@@ -44,7 +44,7 @@ class Service {
   vector<ServiceListener<V> *> listeners = vector<ServiceListener<V> *>();
 
  protected:
-  unordered_map<K, V> dataStore = unordered_map<K, V>();
+  unordered_map<K, V> dataStore;
 
  public:
 
