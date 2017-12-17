@@ -56,12 +56,13 @@ BondPositionConnector::BondPositionConnector(const string &filePath) : OutputFil
 
 string BondPositionConnector::toCSVString(Position<Bond> &data) {
   std::ostringstream oss;
-  oss << data.GetProduct().GetProductId() << "," <<
+  oss << boost::posix_time::microsec_clock::universal_time() << "," <<
+      data.GetProduct().GetProductId() << "," <<
       data.GetAggregatePosition();
   return oss.str();;
 }
 string BondPositionConnector::getCSVHeader() {
-  return "CUSIP,Position";
+  return "Timestamp,CUSIP,Position";
 }
 
 BondPositionServiceListener::BondPositionServiceListener(HistoricalDataService<Position<Bond>> *listeningService)

@@ -54,7 +54,8 @@ BondExecutionOrderConnector::BondExecutionOrderConnector(const string &filePath)
 
 string BondExecutionOrderConnector::toCSVString(ExecutionOrder<Bond> &data) {
   std::ostringstream oss;
-  oss << data.GetProduct().GetProductId() << "," <<
+  oss << boost::posix_time::microsec_clock::universal_time() << "," <<
+      data.GetProduct().GetProductId() << "," <<
       data.GetSide() << "," <<
       data.GetOrderId() << "," <<
       data.GetOrderType() << "," <<
@@ -66,7 +67,7 @@ string BondExecutionOrderConnector::toCSVString(ExecutionOrder<Bond> &data) {
   return oss.str();;
 }
 string BondExecutionOrderConnector::getCSVHeader() {
-  return "CUSIP,PricingSide,OrderId,OrderType,Price,VisibleQuantity,HiddenQuantity,ParentOrderId,IsChildOrder";
+  return "Timestamp,CUSIP,PricingSide,OrderId,OrderType,Price,VisibleQuantity,HiddenQuantity,ParentOrderId,IsChildOrder";
 }
 
 BondExecutionOrderServiceListener::BondExecutionOrderServiceListener(HistoricalDataService<ExecutionOrder<Bond>> *listeningService)

@@ -54,7 +54,8 @@ BondPriceStreamsConnector::BondPriceStreamsConnector(const string &filePath) : O
 
 string BondPriceStreamsConnector::toCSVString(PriceStream<Bond> &data) {
   std::ostringstream oss;
-  oss << data.GetProduct().GetProductId() << "," <<
+  oss << boost::posix_time::microsec_clock::universal_time() << "," <<
+      data.GetProduct().GetProductId() << "," <<
       data.GetBidOrder().GetPrice() << "," <<
       data.GetBidOrder().GetVisibleQuantity() << "," <<
       data.GetBidOrder().GetHiddenQuantity() << "," <<
@@ -64,7 +65,7 @@ string BondPriceStreamsConnector::toCSVString(PriceStream<Bond> &data) {
   return oss.str();
 }
 string BondPriceStreamsConnector::getCSVHeader() {
-  return "CUSIP,BidPrice,BidVisibleQuantity,BidHiddenQuantity,OfferPrice,OfferVisibleQuantity,OfferHiddenQuantity";
+  return "Timestamp,CUSIP,BidPrice,BidVisibleQuantity,BidHiddenQuantity,OfferPrice,OfferVisibleQuantity,OfferHiddenQuantity";
 }
 
 BondPriceStreamsServiceListener::BondPriceStreamsServiceListener(HistoricalDataService<PriceStream<Bond>> *listeningService)

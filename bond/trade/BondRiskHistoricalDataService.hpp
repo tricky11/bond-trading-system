@@ -56,13 +56,14 @@ BondRiskConnector::BondRiskConnector(const string &filePath) : OutputFileConnect
 
 string BondRiskConnector::toCSVString(PV01<Bond> &data) {
   std::ostringstream oss;
-  oss << data.GetProduct().GetProductId() << "," <<
+  oss << boost::posix_time::microsec_clock::universal_time() << "," <<
+      data.GetProduct().GetProductId() << "," <<
       data.GetQuantity() << "," <<
       data.GetPV01();
   return oss.str();;
 }
 string BondRiskConnector::getCSVHeader() {
-  return "CUSIP,Quantity,PV01";
+  return "Timestamp,CUSIP,Quantity,PV01";
 }
 
 BondRiskServiceListener::BondRiskServiceListener(HistoricalDataService<PV01<Bond>> *listeningService)

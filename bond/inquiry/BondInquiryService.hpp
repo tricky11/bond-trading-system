@@ -34,7 +34,7 @@ class BondInquiryPublisher : public OutputFileConnector<Inquiry<Bond>> {
 
   string toCSVString(Inquiry<Bond> &data) override {
     std::ostringstream oss;
-    oss <<
+    oss <<boost::posix_time::microsec_clock::universal_time() << "," <<
         data.GetInquiryId() << "," <<
         data.GetProduct().GetProductId() << "," <<
         data.GetSide() << "," <<
@@ -45,7 +45,7 @@ class BondInquiryPublisher : public OutputFileConnector<Inquiry<Bond>> {
   }
 
   string getCSVHeader() override {
-    return "InquiryId,ProductId,Side,Quantity,Price,State";
+    return "Timestamp,InquiryId,ProductId,Side,Quantity,Price,State";
   }
 };
 

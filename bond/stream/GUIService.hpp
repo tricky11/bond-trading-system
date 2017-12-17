@@ -61,13 +61,14 @@ GUIConnector::GUIConnector(const string &filePath) : OutputFileConnector(filePat
 string GUIConnector::toCSVString(Price<Bond> &data) {
   std::ostringstream oss;
   // Calculate bid and offer prices from mid and spread.
-  oss << data.GetProduct().GetProductId() << "," <<
+  oss << boost::posix_time::microsec_clock::universal_time() << "," <<
+      data.GetProduct().GetProductId() << "," <<
       (data.GetMid() - data.GetBidOfferSpread() / 2) << "," <<
       (data.GetMid() + data.GetBidOfferSpread() / 2);
   return oss.str();
 }
 string GUIConnector::getCSVHeader() {
-  return "CUSIP,BidPrice,OfferPrice";
+  return "Timestamp,CUSIP,BidPrice,OfferPrice";
 }
 
 /**
