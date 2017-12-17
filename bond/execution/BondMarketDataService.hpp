@@ -66,12 +66,12 @@ void BondMarketDataService::Subscribe(BondMarketDataConnector *connector) {
 const BidOffer &BondMarketDataService::GetBestBidOffer(const string &productId) {
   if (!(dataStore.find(productId) == dataStore.end())) {
     OrderBook<Bond> orderBook = dataStore.at(productId);
-    BidOffer bidOffer
+    BidOffer *bidOffer = new BidOffer
         (Order(orderBook.GetBidStack()[0].GetPrice(), orderBook.GetBidStack()[0].GetQuantity(), PricingSide::BID),
          Order(orderBook.GetOfferStack()[0].GetPrice(),
                orderBook.GetOfferStack()[0].GetQuantity(),
                PricingSide::OFFER));
-    return bidOffer;
+    return *bidOffer;
   }
 }
 const OrderBook<Bond> &BondMarketDataService::AggregateDepth(const string &productId) {
@@ -91,8 +91,8 @@ const OrderBook<Bond> &BondMarketDataService::AggregateDepth(const string &produ
     double averageOfferPrice = totalOfferVolume / totalOfferCost;
     vector<Order> aggregatedBidStack({Order(averageBidPrice, totalBidVolume, PricingSide::BID)});
     vector<Order> aggregatedOfferStack({Order(averageOfferPrice, totalOfferVolume, PricingSide::OFFER)});
-    OrderBook<Bond> aggregateOrderBook(orderBook.GetProduct(), aggregatedBidStack, aggregatedOfferStack);
-    return aggregateOrderBook;
+    OrderBook<Bond> *aggregateOrderBook = new OrderBook<Bond>(orderBook.GetProduct(), aggregatedBidStack, aggregatedOfferStack);
+    return *aggregateOrderBook;
   }
 }
 

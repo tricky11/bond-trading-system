@@ -20,12 +20,12 @@ class BondRiskService : public RiskService<Bond> {
     auto product = position.GetProduct();
     PV01<Bond> risk(product, position.GetAggregatePosition(), position.GetAggregatePosition());
     if (dataStore.find(position.GetProduct().GetProductId()) == dataStore.end()) {
-      dataStore.insert(make_pair(position.GetProduct().GetProductId(),risk));
+      dataStore.insert(make_pair(position.GetProduct().GetProductId(), risk));
       for (auto listener:this->GetListeners()) {
         listener->ProcessAdd(risk);
       }
     } else {
-      dataStore.insert(make_pair(position.GetProduct().GetProductId(),risk));
+      dataStore.insert(make_pair(position.GetProduct().GetProductId(), risk));
       for (auto listener:this->GetListeners()) {
         listener->ProcessUpdate(risk);
       }
@@ -41,7 +41,8 @@ class BondRiskService : public RiskService<Bond> {
         totalPosition += dataStore.at(product.GetProductId()).GetQuantity();
       }
     }
-    return PV01<BucketedSector<Bond>>(sector, totalPV01, totalPosition);
+    auto pv01 = new PV01<BucketedSector<Bond>>(sector, totalPV01, totalPosition);
+    return *pv01;
   }
 };
 
