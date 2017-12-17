@@ -3,6 +3,7 @@
 This project demonstrates the use of Service Oriented Architecture and implements a Bond Trading System which can trade six US Treasuries: 2Y, 3Y, 5Y, 7Y, 10Y, and 30Y.
 ServiceListeners are used to pass data between services. Connectors are used for I/O.
 ## Generating data
+* cd into the scripts directory
 * Use the provided scripts/input_data_generator.py to generate trades, prices, inquiries and market data.
 * Run input_data_generator.py -h for help and more details on how to generate data set. 
 * By default, it generates all datasets and full size (WARNING: Takes too long to run!)
@@ -13,6 +14,7 @@ ServiceListeners are used to pass data between services. Connectors are used for
 * Application needs to have write access to directory 'output' inside the root of the project
 
 ## Building and running
+* cd into the root directory
 * cmake .
 * make
 * ./BondTradingSystem
