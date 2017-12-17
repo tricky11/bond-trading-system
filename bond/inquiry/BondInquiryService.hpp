@@ -19,13 +19,11 @@ class BondInquirySubscriber : public InputFileConnector<string, Inquiry<Bond>> {
  private:
   void parse(string line) override {
     auto split = splitString(line, ',');
-    string inquiryId = split[0];
-    string productId = split[1];
+    string productId = split[0], inquiryId = split[1];
     Side side = (split[2].compare("0") == 0) ? BUY : SELL;
     long quantity = stol(split[3]);
-    double price = stol(split[4]);
     auto bond = BondProductService::GetInstance()->GetData(productId);
-    auto inquiry = Inquiry<Bond>(inquiryId, bond, side, quantity, price, InquiryState::RECEIVED);
+    auto inquiry = Inquiry<Bond>(inquiryId, bond, side, quantity, 0.0, InquiryState::RECEIVED);
     connectedService->OnMessage(inquiry);
   }
 };

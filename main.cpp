@@ -84,7 +84,7 @@ void runInquiryFlow() {
   auto inquiryService = new BondInquiryService();
   auto inquiryServiceListener = new BondInquiryServiceListener(inquiryService);
   inquiryService->AddListener(inquiryServiceListener);
-  inquiryService->Subscribe(new BondInquirySubscriber("input/inquiry.csv", inquiryService));
+  inquiryService->Subscribe(new BondInquirySubscriber("input/inquiries.csv", inquiryService));
 }
 
 void runStreamingFlow() {

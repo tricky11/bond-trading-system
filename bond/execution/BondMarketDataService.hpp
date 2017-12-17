@@ -33,8 +33,8 @@ void BondMarketDataConnector::parse(string line) {
   vector<Order> bidStack;
   vector<Order> offerStack;
   for (int i = 1; i <= 5; ++i) {
-    Order bid(stod(split[i]), stol(split[i + 1]), PricingSide::BID);
-    Order offer(stod(split[10 + i]), stol(split[11 + i]), PricingSide::OFFER);
+    Order bid(stod(split[2 * i - 1]), stol(split[2 * i]), PricingSide::BID);
+    Order offer(stod(split[9 + 2 * i]), stol(split[10 + 2 * i]), PricingSide::OFFER);
     bidStack.push_back(bid);
     offerStack.push_back(offer);
   }
@@ -91,7 +91,8 @@ const OrderBook<Bond> &BondMarketDataService::AggregateDepth(const string &produ
     double averageOfferPrice = totalOfferVolume / totalOfferCost;
     vector<Order> aggregatedBidStack({Order(averageBidPrice, totalBidVolume, PricingSide::BID)});
     vector<Order> aggregatedOfferStack({Order(averageOfferPrice, totalOfferVolume, PricingSide::OFFER)});
-    OrderBook<Bond> *aggregateOrderBook = new OrderBook<Bond>(orderBook.GetProduct(), aggregatedBidStack, aggregatedOfferStack);
+    OrderBook<Bond>
+        *aggregateOrderBook = new OrderBook<Bond>(orderBook.GetProduct(), aggregatedBidStack, aggregatedOfferStack);
     return *aggregateOrderBook;
   }
 }
